@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="100%" style="stop-color:#1a1a24"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a9eff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  <g transform="translate(80, 120)">
+    <!-- Chart bars -->
+    <rect x="0" y="180" width="60" height="100" rx="8" fill="#00d4aa" opacity="0.8"/>
+    <rect x="90" y="120" width="60" height="160" rx="8" fill="#00d4aa"/>
+    <rect x="180" y="80" width="60" height="200" rx="8" fill="url(#accent)"/>
+    <rect x="270" y="40" width="60" height="240" rx="8" fill="#a855f7"/>
+    <!-- Trend line -->
+    <path d="M30 160 L120 100 L210 60 L300 20" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Arrow -->
+    <polygon points="300,20 280,40 290,25 275,30" fill="#fff"/>
+  </g>
+  <text x="256" y="420" text-anchor="middle" fill="#fff" font-family="system-ui" font-size="48" font-weight="700">MARKET PULSE</text>
+</svg>
+
