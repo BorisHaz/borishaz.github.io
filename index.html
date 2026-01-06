@@ -1527,15 +1527,15 @@
                 <div class="trade-levels">
                     <div class="level-item entry">
                         <div class="level-label">🟢 Entry Zone</div>
-                        <div class="level-value" id="trade-entry">$408 - $412</div>
+                        <div class="level-value" id="trade-entry">Loading...</div>
                     </div>
                     <div class="level-item target">
                         <div class="level-label">🎯 Target</div>
-                        <div class="level-value" id="trade-target">$420 - $425</div>
+                        <div class="level-value" id="trade-target">Loading...</div>
                     </div>
                     <div class="level-item stop">
                         <div class="level-label">🛑 Stop Loss</div>
-                        <div class="level-value" id="trade-stop">$402</div>
+                        <div class="level-value" id="trade-stop">Loading...</div>
                     </div>
                     <div class="level-item rr">
                         <div class="level-label">📊 Risk/Reward</div>
@@ -1544,7 +1544,7 @@
                 </div>
                 <div class="trade-thesis">
                     <h4>Trade Setup</h4>
-                    <p id="trade-thesis">High volatility expected with pre-market momentum. Look for breakout above $412 with volume confirmation. Take partial profits at first target, trail stop on remainder.</p>
+                    <p id="trade-thesis">Loading trade setup...</p>
                 </div>
                 <div class="trade-disclaimer">
                     ⚠️ Day trading involves significant risk. This is not financial advice. Always use proper risk management.
@@ -1563,7 +1563,7 @@
                 <div class="pick-main">
                     <div class="pick-symbol" id="daily-symbol">NVDA</div>
                     <div class="pick-name" id="daily-name">NVIDIA Corporation</div>
-                    <div class="pick-price" id="daily-price">$149.43</div>
+                    <div class="pick-price" id="daily-price">Loading...</div>
                 </div>
                 <div class="pick-details">
                     <div class="pick-stat">
@@ -1930,7 +1930,7 @@
                 
             } catch (error) {
                 console.error('Error fetching XRP data:', error);
-                document.getElementById('xrp-price-small').textContent = '$2.35';
+                document.getElementById('xrp-price-small').textContent = 'N/A';
             }
         }
 
@@ -1958,21 +1958,22 @@
             }
         }
 
-        // Fallback prices (updated regularly)
+        // Fallback prices - only used if API fails (updated Jan 2025)
+        // These are backup values, live data is always preferred
         const fallbackPrices = {
-            'SHOP': { price: 166.86, change: 1.2, marketCap: 216e9, volume: 8.2e6 },
-            'NVDA': { price: 149.43, change: 0.8, marketCap: 3.6e12, volume: 45e6 },
-            'AMZN': { price: 225.94, change: 0.5, marketCap: 2.4e12, volume: 35e6 },
-            'GOOGL': { price: 197.85, change: -0.3, marketCap: 2.4e12, volume: 25e6 },
-            'META': { price: 617.12, change: 1.1, marketCap: 1.6e12, volume: 15e6 },
-            'TSLA': { price: 410.44, change: 2.5, marketCap: 1.3e12, volume: 100e6 },
-            'MSFT': { price: 425.22, change: 0.4, marketCap: 3.1e12, volume: 20e6 },
-            'AMD': { price: 120.50, change: 1.8, marketCap: 195e9, volume: 50e6 },
-            'COIN': { price: 280.25, change: 3.5, marketCap: 71e9, volume: 12e6 },
-            'MSTR': { price: 390.80, change: 4.2, marketCap: 78e9, volume: 15e6 },
-            'SPY': { price: 594.50, change: 0.3, marketCap: 560e9, volume: 80e6 },
-            '^GSPC': { price: 5942, change: 0.3 },
-            '^IXIC': { price: 19478, change: 0.5 }
+            'SHOP': { price: 115.00, change: 0, marketCap: 150e9, volume: 5e6 },
+            'NVDA': { price: 140.00, change: 0, marketCap: 3.4e12, volume: 40e6 },
+            'AMZN': { price: 220.00, change: 0, marketCap: 2.3e12, volume: 30e6 },
+            'GOOGL': { price: 195.00, change: 0, marketCap: 2.4e12, volume: 20e6 },
+            'META': { price: 600.00, change: 0, marketCap: 1.5e12, volume: 12e6 },
+            'TSLA': { price: 400.00, change: 0, marketCap: 1.3e12, volume: 90e6 },
+            'MSFT': { price: 420.00, change: 0, marketCap: 3.1e12, volume: 18e6 },
+            'AMD': { price: 120.00, change: 0, marketCap: 195e9, volume: 45e6 },
+            'COIN': { price: 270.00, change: 0, marketCap: 68e9, volume: 10e6 },
+            'MSTR': { price: 380.00, change: 0, marketCap: 75e9, volume: 12e6 },
+            'SPY': { price: 590.00, change: 0, marketCap: 550e9, volume: 70e6 },
+            '^GSPC': { price: 5900, change: 0 },
+            '^IXIC': { price: 19400, change: 0 }
         };
 
         // Fetch with timeout
@@ -2037,10 +2038,10 @@
                     const chartData = generateChartData(data.price, data.change);
                     document.getElementById('shop-chart').innerHTML = generateChart(chartData, data.change >= 0);
                 } else {
-                    // Fallback to last known price
-                    document.getElementById('shop-price').textContent = '$166.86';
-                    document.getElementById('shop-mcap').textContent = '$216B';
-                    document.getElementById('shop-vol').textContent = '8.2M';
+                    // Show N/A if API fails
+                    document.getElementById('shop-price').textContent = 'N/A';
+                    document.getElementById('shop-mcap').textContent = 'N/A';
+                    document.getElementById('shop-vol').textContent = 'N/A';
                 }
             } catch (error) {
                 console.error('Error fetching Shopify data:', error);
@@ -2222,22 +2223,21 @@
             document.getElementById('daily-thesis').textContent = pick.thesis;
             document.getElementById('daily-target').textContent = formatCurrency(pick.targetPrice, 0);
             
-            // Show fallback price immediately while fetching
-            const fallback = fallbackPrices[pick.symbol];
-            if (fallback) {
-                const upside = ((pick.targetPrice - fallback.price) / fallback.price * 100).toFixed(0);
-                document.getElementById('daily-price').textContent = formatCurrency(fallback.price);
-                document.getElementById('daily-upside').textContent = `+${upside}%`;
-            }
+            // Show loading state
+            document.getElementById('daily-price').textContent = 'Loading...';
+            document.getElementById('daily-upside').textContent = '...';
             
-            // Then try to fetch real-time price
+            // Fetch real-time price
             const stockData = await fetchYahooStock(pick.symbol);
             if (stockData && stockData.price) {
                 const currentPrice = stockData.price;
                 const upside = ((pick.targetPrice - currentPrice) / currentPrice * 100).toFixed(0);
                 
                 document.getElementById('daily-price').textContent = formatCurrency(currentPrice);
-                document.getElementById('daily-upside').textContent = `+${upside}%`;
+                document.getElementById('daily-upside').textContent = upside >= 0 ? `+${upside}%` : `${upside}%`;
+            } else {
+                document.getElementById('daily-price').textContent = 'N/A';
+                document.getElementById('daily-upside').textContent = 'N/A';
             }
         }
 
