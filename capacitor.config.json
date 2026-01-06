@@ -1,0 +1,16 @@
+{
+  "appId": "io.github.borishaz.marketpulse",
+  "appName": "Market Pulse",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": false
+  },
+  "server": {
+    "allowNavigation": [
+      "api.coingecko.com",
+      "query1.finance.yahoo.com",
+      "api.allorigins.win"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "market-pulse",
+  "version": "1.0.0",
+  "description": "Live stock & crypto prices, predictions, and trading signals",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step needed'",
+    "ios": "npx cap open ios",
+    "sync": "npx cap sync"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BorisHaz/borishaz.github.io.git"
+  },
+  "keywords": [
+    "stocks",
+    "crypto",
+    "trading",
+    "finance"
+  ],
+  "author": "Boris Hazanov",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0"
+  }
+}
