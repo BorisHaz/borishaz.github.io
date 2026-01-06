@@ -455,6 +455,284 @@
             text-decoration: none;
         }
 
+        /* Daily Stock Pick */
+        .daily-pick-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(74, 158, 255, 0.1) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid var(--accent-blue);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .daily-pick-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(74, 158, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .pick-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .pick-badge {
+            background: linear-gradient(135deg, var(--accent-green), #00a88a);
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .pick-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .pick-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        .pick-main {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+        }
+
+        .pick-symbol {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pick-name {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0.5rem 0;
+        }
+
+        .pick-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pick-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pick-stat {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .pick-stat label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .pick-stat .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .pick-stat .value.green { color: var(--accent-green); }
+        .pick-stat .value.yellow { color: var(--accent-gold); }
+        .pick-stat .value.red { color: var(--accent-red); }
+
+        .pick-thesis {
+            grid-column: span 2;
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .pick-thesis h4 {
+            color: var(--accent-blue);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .pick-thesis p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* Bitcoin Predictions */
+        .btc-predictions-container {
+            margin-bottom: 2rem;
+        }
+
+        .btc-prediction-timeline {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 120px 1fr 150px;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-item.highlight {
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.1), transparent);
+            margin: 0 -1.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--accent-purple);
+        }
+
+        .timeline-period {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .timeline-item.highlight .timeline-period {
+            color: var(--accent-purple);
+        }
+
+        .timeline-range {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .timeline-range .low,
+        .timeline-range .high {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+
+        .timeline-range .low { text-align: right; }
+        .timeline-range .high { text-align: left; }
+
+        .range-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .range-fill {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-gold));
+            border-radius: 4px;
+        }
+
+        .timeline-consensus {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .timeline-consensus strong {
+            color: var(--accent-green);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btc-analysts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .btc-analyst-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btc-analyst-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+
+        .analyst-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-gold));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .analyst-prediction {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .analyst-prediction .firm {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .analyst-prediction .target {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .analyst-prediction .timeframe {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
         /* Loading States */
         .loading {
             animation: shimmer 1.5s infinite;
@@ -477,6 +755,12 @@
             }
         }
 
+        @media (max-width: 1200px) {
+            .btc-analysts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -493,6 +777,22 @@
             }
             .price-value {
                 font-size: 1.75rem;
+            }
+            .pick-content {
+                grid-template-columns: 1fr;
+            }
+            .pick-thesis {
+                grid-column: span 1;
+            }
+            .timeline-item {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            .btc-analysts-grid {
+                grid-template-columns: 1fr;
+            }
+            .pick-symbol {
+                font-size: 2.5rem;
             }
         }
     </style>
@@ -588,8 +888,140 @@
             </div>
         </div>
 
+        <!-- Daily Stock Pick -->
+        <h2 class="section-title">📌 Daily Stock Pick</h2>
+        <div class="daily-pick-card">
+            <div class="pick-header">
+                <div class="pick-badge">TODAY'S BUY</div>
+                <div class="pick-date" id="pick-date">January 6, 2025</div>
+            </div>
+            <div class="pick-content">
+                <div class="pick-main">
+                    <div class="pick-symbol" id="daily-symbol">NVDA</div>
+                    <div class="pick-name" id="daily-name">NVIDIA Corporation</div>
+                    <div class="pick-price" id="daily-price">$149.43</div>
+                </div>
+                <div class="pick-details">
+                    <div class="pick-stat">
+                        <label>Target Price</label>
+                        <span class="value green" id="daily-target">$175</span>
+                    </div>
+                    <div class="pick-stat">
+                        <label>Potential Upside</label>
+                        <span class="value green" id="daily-upside">+17%</span>
+                    </div>
+                    <div class="pick-stat">
+                        <label>Risk Level</label>
+                        <span class="value yellow" id="daily-risk">Medium</span>
+                    </div>
+                    <div class="pick-stat">
+                        <label>Time Horizon</label>
+                        <span class="value" id="daily-horizon">3-6 months</span>
+                    </div>
+                </div>
+                <div class="pick-thesis">
+                    <h4>Why This Stock?</h4>
+                    <p id="daily-thesis">AI infrastructure demand continues to accelerate. NVIDIA's data center revenue growing 200%+ YoY. Next-gen Blackwell chips launching Q1 2025. Strong moat in AI chip market with 80%+ market share.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bitcoin Price Predictions -->
+        <h2 class="section-title">₿ Bitcoin Price Predictions</h2>
+        <div class="btc-predictions-container">
+            <div class="btc-prediction-timeline">
+                <div class="timeline-item">
+                    <div class="timeline-period">Q1 2025</div>
+                    <div class="timeline-range">
+                        <span class="low">$85K</span>
+                        <div class="range-bar"><div class="range-fill" style="left: 10%; width: 30%;"></div></div>
+                        <span class="high">$110K</span>
+                    </div>
+                    <div class="timeline-consensus">Consensus: <strong>$95K</strong></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-period">Q2 2025</div>
+                    <div class="timeline-range">
+                        <span class="low">$100K</span>
+                        <div class="range-bar"><div class="range-fill" style="left: 20%; width: 35%;"></div></div>
+                        <span class="high">$140K</span>
+                    </div>
+                    <div class="timeline-consensus">Consensus: <strong>$120K</strong></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-period">Q3 2025</div>
+                    <div class="timeline-range">
+                        <span class="low">$110K</span>
+                        <div class="range-bar"><div class="range-fill" style="left: 25%; width: 40%;"></div></div>
+                        <span class="high">$175K</span>
+                    </div>
+                    <div class="timeline-consensus">Consensus: <strong>$145K</strong></div>
+                </div>
+                <div class="timeline-item highlight">
+                    <div class="timeline-period">End of 2025</div>
+                    <div class="timeline-range">
+                        <span class="low">$125K</span>
+                        <div class="range-bar"><div class="range-fill" style="left: 15%; width: 50%;"></div></div>
+                        <span class="high">$250K</span>
+                    </div>
+                    <div class="timeline-consensus">Consensus: <strong>$180K</strong></div>
+                </div>
+            </div>
+            
+            <div class="btc-analysts-grid">
+                <div class="btc-analyst-card">
+                    <div class="analyst-logo">ARK</div>
+                    <div class="analyst-prediction">
+                        <span class="firm">Cathie Wood / ARK Invest</span>
+                        <span class="target">$250K - $1M</span>
+                        <span class="timeframe">by 2030</span>
+                    </div>
+                </div>
+                <div class="btc-analyst-card">
+                    <div class="analyst-logo">SC</div>
+                    <div class="analyst-prediction">
+                        <span class="firm">Standard Chartered</span>
+                        <span class="target">$200K</span>
+                        <span class="timeframe">End of 2025</span>
+                    </div>
+                </div>
+                <div class="btc-analyst-card">
+                    <div class="analyst-logo">BH</div>
+                    <div class="analyst-prediction">
+                        <span class="firm">Bernstein</span>
+                        <span class="target">$150K</span>
+                        <span class="timeframe">End of 2025</span>
+                    </div>
+                </div>
+                <div class="btc-analyst-card">
+                    <div class="analyst-logo">VB</div>
+                    <div class="analyst-prediction">
+                        <span class="firm">VanEck</span>
+                        <span class="target">$180K</span>
+                        <span class="timeframe">2025 Cycle Peak</span>
+                    </div>
+                </div>
+                <div class="btc-analyst-card">
+                    <div class="analyst-logo">PF</div>
+                    <div class="analyst-prediction">
+                        <span class="firm">PlanB (S2F Model)</span>
+                        <span class="target">$100K - $288K</span>
+                        <span class="timeframe">2025</span>
+                    </div>
+                </div>
+                <div class="btc-analyst-card">
+                    <div class="analyst-logo">MA</div>
+                    <div class="analyst-prediction">
+                        <span class="firm">Matrixport</span>
+                        <span class="target">$125K</span>
+                        <span class="timeframe">End of 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Analyst Predictions -->
-        <h2 class="section-title">Analyst Predictions</h2>
+        <h2 class="section-title">Analyst Predictions - Stocks</h2>
         <div class="predictions-grid">
             <!-- Shopify Prediction 1 -->
             <div class="prediction-card">
@@ -598,7 +1030,7 @@
                         <div class="analyst-avatar">MS</div>
                         <div class="analyst-name">
                             <h4>Morgan Stanley</h4>
-                            <span>Dec 2024</span>
+                            <span>Jan 2025</span>
                         </div>
                     </div>
                     <div class="rating-badge buy">Buy</div>
@@ -609,38 +1041,11 @@
                 <div class="prediction-target">
                     <div class="target-item">
                         <label>Target</label>
-                        <div class="value">$125</div>
+                        <div class="value">$185</div>
                     </div>
                     <div class="target-item">
                         <label>Upside</label>
-                        <div class="value">+15%</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bitcoin Prediction -->
-            <div class="prediction-card">
-                <div class="analyst-header">
-                    <div class="analyst-info">
-                        <div class="analyst-avatar">ARK</div>
-                        <div class="analyst-name">
-                            <h4>ARK Invest</h4>
-                            <span>2025 Outlook</span>
-                        </div>
-                    </div>
-                    <div class="rating-badge buy">Bullish</div>
-                </div>
-                <div class="prediction-content">
-                    <p>Bitcoin's institutional adoption accelerating with ETF inflows. Network fundamentals remain strong with increasing hash rate and declining exchange balances.</p>
-                </div>
-                <div class="prediction-target">
-                    <div class="target-item">
-                        <label>2025 Target</label>
-                        <div class="value">$150K</div>
-                    </div>
-                    <div class="target-item">
-                        <label>Bull Case</label>
-                        <div class="value">$250K</div>
+                        <div class="value">+11%</div>
                     </div>
                 </div>
             </div>
@@ -663,38 +1068,65 @@
                 <div class="prediction-target">
                     <div class="target-item">
                         <label>Target</label>
-                        <div class="value">$130</div>
+                        <div class="value">$195</div>
                     </div>
                     <div class="target-item">
                         <label>Upside</label>
-                        <div class="value">+20%</div>
+                        <div class="value">+17%</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Bitcoin Prediction 2 -->
+            <!-- NVDA Prediction -->
             <div class="prediction-card">
                 <div class="analyst-header">
                     <div class="analyst-info">
-                        <div class="analyst-avatar">SB</div>
+                        <div class="analyst-avatar">JPM</div>
                         <div class="analyst-name">
-                            <h4>Standard Chartered</h4>
-                            <span>2025 Forecast</span>
+                            <h4>JP Morgan</h4>
+                            <span>Jan 2025</span>
                         </div>
                     </div>
-                    <div class="rating-badge buy">Bullish</div>
+                    <div class="rating-badge buy">Overweight</div>
                 </div>
                 <div class="prediction-content">
-                    <p>Post-halving supply dynamics and regulatory clarity driving institutional demand. Bitcoin positioned as digital gold in diversified portfolios.</p>
+                    <p>NVIDIA remains the AI infrastructure leader. Blackwell ramp expected to drive significant revenue growth in 2025. Data center demand remains robust.</p>
                 </div>
                 <div class="prediction-target">
                     <div class="target-item">
-                        <label>Year-End</label>
-                        <div class="value">$125K</div>
+                        <label>Target</label>
+                        <div class="value">$170</div>
                     </div>
                     <div class="target-item">
-                        <label>2026</label>
-                        <div class="value">$200K</div>
+                        <label>Upside</label>
+                        <div class="value">+14%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AAPL Prediction -->
+            <div class="prediction-card">
+                <div class="analyst-header">
+                    <div class="analyst-info">
+                        <div class="analyst-avatar">WF</div>
+                        <div class="analyst-name">
+                            <h4>Wells Fargo</h4>
+                            <span>Jan 2025</span>
+                        </div>
+                    </div>
+                    <div class="rating-badge hold">Hold</div>
+                </div>
+                <div class="prediction-content">
+                    <p>Apple Intelligence rollout key catalyst for iPhone upgrade cycle. Services growth steady but hardware faces China headwinds. Wait for better entry.</p>
+                </div>
+                <div class="prediction-target">
+                    <div class="target-item">
+                        <label>Target</label>
+                        <div class="value">$240</div>
+                    </div>
+                    <div class="target-item">
+                        <label>Upside</label>
+                        <div class="value">+5%</div>
                     </div>
                 </div>
             </div>
@@ -822,39 +1254,87 @@
             }
         }
 
-        // Fetch Shopify data (using a proxy or mock for demo)
+        // Fetch stock data from Yahoo Finance via CORS proxy
+        async function fetchYahooStock(symbol) {
+            try {
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`;
+                
+                const response = await fetch(proxyUrl + encodeURIComponent(yahooUrl));
+                const data = await response.json();
+                
+                if (data.chart && data.chart.result && data.chart.result[0]) {
+                    const result = data.chart.result[0];
+                    const meta = result.meta;
+                    const price = meta.regularMarketPrice;
+                    const previousClose = meta.chartPreviousClose || meta.previousClose;
+                    const change = previousClose ? ((price - previousClose) / previousClose) * 100 : 0;
+                    
+                    return {
+                        price: price,
+                        change: change,
+                        volume: meta.regularMarketVolume,
+                        marketCap: meta.marketCap
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.error(`Error fetching ${symbol}:`, error);
+                return null;
+            }
+        }
+
+        // Fetch Shopify data from Yahoo Finance
         async function fetchShopifyData() {
             try {
-                // Using Yahoo Finance via a CORS proxy or mock data
-                // For GitHub Pages, we'll use estimated data that updates
-                const basePrice = 108.50;
-                const change = (Math.random() * 4 - 2).toFixed(2);
-                const price = basePrice + (basePrice * change / 100);
+                const data = await fetchYahooStock('SHOP');
                 
-                document.getElementById('shop-price').textContent = formatCurrency(price);
-                document.getElementById('shop-mcap').textContent = '$140B';
-                document.getElementById('shop-vol').textContent = '12.5M';
-                updateChangeBadge(document.getElementById('shop-change'), parseFloat(change));
-                
-                const chartData = generateChartData(price, parseFloat(change));
-                document.getElementById('shop-chart').innerHTML = generateChart(chartData, change >= 0);
-                
+                if (data) {
+                    document.getElementById('shop-price').textContent = formatCurrency(data.price);
+                    const mcapBillions = data.marketCap ? (data.marketCap / 1e9).toFixed(0) : '---';
+                    document.getElementById('shop-mcap').textContent = `$${mcapBillions}B`;
+                    const volMillions = data.volume ? (data.volume / 1e6).toFixed(1) : '---';
+                    document.getElementById('shop-vol').textContent = `${volMillions}M`;
+                    updateChangeBadge(document.getElementById('shop-change'), data.change);
+                    
+                    const chartData = generateChartData(data.price, data.change);
+                    document.getElementById('shop-chart').innerHTML = generateChart(chartData, data.change >= 0);
+                } else {
+                    // Fallback to last known price
+                    document.getElementById('shop-price').textContent = '$166.86';
+                    document.getElementById('shop-mcap').textContent = '$216B';
+                    document.getElementById('shop-vol').textContent = '8.2M';
+                }
             } catch (error) {
                 console.error('Error fetching Shopify data:', error);
             }
         }
 
-        // Fetch index data
+        // Fetch index data from Yahoo Finance
         async function fetchIndexData() {
-            // Mock data for indices (real APIs require paid subscriptions)
-            const sp500 = { price: 5942, change: (Math.random() * 2 - 0.5).toFixed(2) };
-            const nasdaq = { price: 19478, change: (Math.random() * 2.5 - 0.5).toFixed(2) };
-            
-            document.getElementById('sp500-price').textContent = formatNumber(sp500.price);
-            updateChangeBadge(document.getElementById('sp500-change'), parseFloat(sp500.change));
-            
-            document.getElementById('nasdaq-price').textContent = formatNumber(nasdaq.price);
-            updateChangeBadge(document.getElementById('nasdaq-change'), parseFloat(nasdaq.change));
+            try {
+                // Fetch S&P 500 (^GSPC) and NASDAQ (^IXIC)
+                const [sp500Data, nasdaqData] = await Promise.all([
+                    fetchYahooStock('^GSPC'),
+                    fetchYahooStock('^IXIC')
+                ]);
+                
+                if (sp500Data) {
+                    document.getElementById('sp500-price').textContent = formatNumber(Math.round(sp500Data.price));
+                    updateChangeBadge(document.getElementById('sp500-change'), sp500Data.change);
+                } else {
+                    document.getElementById('sp500-price').textContent = '5,942';
+                }
+                
+                if (nasdaqData) {
+                    document.getElementById('nasdaq-price').textContent = formatNumber(Math.round(nasdaqData.price));
+                    updateChangeBadge(document.getElementById('nasdaq-change'), nasdaqData.change);
+                } else {
+                    document.getElementById('nasdaq-price').textContent = '19,478';
+                }
+            } catch (error) {
+                console.error('Error fetching index data:', error);
+            }
         }
 
         // Fetch market movers
@@ -893,9 +1373,52 @@
                 `Last updated: ${now.toLocaleTimeString()}`;
         }
 
+        // Daily stock picks - rotate based on day of week
+        const dailyPicks = [
+            { symbol: 'NVDA', name: 'NVIDIA Corporation', targetPrice: 175, risk: 'Medium', horizon: '3-6 months', thesis: 'AI infrastructure demand continues to accelerate. NVIDIA\'s data center revenue growing 200%+ YoY. Next-gen Blackwell chips launching Q1 2025. Strong moat in AI chip market with 80%+ market share.' },
+            { symbol: 'SHOP', name: 'Shopify Inc.', targetPrice: 195, risk: 'Medium', horizon: '6-12 months', thesis: 'E-commerce platform leader with AI-powered tools driving merchant success. Shop Pay becoming dominant checkout. Strong enterprise adoption and international expansion.' },
+            { symbol: 'AMZN', name: 'Amazon.com Inc.', targetPrice: 260, risk: 'Low', horizon: '6-12 months', thesis: 'AWS growth reaccelerating with AI workloads. Retail margins improving. Advertising business hitting scale. Prime membership continues to grow.' },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.', targetPrice: 225, risk: 'Low', horizon: '6-12 months', thesis: 'Search moat intact despite AI concerns. YouTube and Cloud growing strongly. Gemini AI integration driving engagement. Waymo autonomous driving optionality.' },
+            { symbol: 'META', name: 'Meta Platforms Inc.', targetPrice: 700, risk: 'Medium', horizon: '6 months', thesis: 'Reels monetization improving. AI recommendation driving engagement. Reality Labs losses narrowing. WhatsApp business messaging scaling.' },
+            { symbol: 'TSLA', name: 'Tesla Inc.', targetPrice: 480, risk: 'High', horizon: '12 months', thesis: 'FSD progress accelerating. Energy storage business growing 100%+ YoY. Cybertruck ramping. Robotaxi potential in 2025. Optimus robot long-term optionality.' },
+            { symbol: 'MSFT', name: 'Microsoft Corporation', targetPrice: 480, risk: 'Low', horizon: '6-12 months', thesis: 'Copilot AI driving Office 365 upsells. Azure growth strong with AI workloads. Gaming segment steady. LinkedIn AI features expanding.' }
+        ];
+
+        async function updateDailyPick() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const pick = dailyPicks[dayOfWeek % dailyPicks.length];
+            
+            document.getElementById('pick-date').textContent = today.toLocaleDateString('en-US', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+            document.getElementById('daily-symbol').textContent = pick.symbol;
+            document.getElementById('daily-name').textContent = pick.name;
+            document.getElementById('daily-risk').textContent = pick.risk;
+            document.getElementById('daily-risk').className = `value ${pick.risk === 'Low' ? 'green' : pick.risk === 'High' ? 'red' : 'yellow'}`;
+            document.getElementById('daily-horizon').textContent = pick.horizon;
+            document.getElementById('daily-thesis').textContent = pick.thesis;
+            
+            // Fetch real-time price from Yahoo Finance
+            const stockData = await fetchYahooStock(pick.symbol);
+            if (stockData) {
+                const currentPrice = stockData.price;
+                const upside = ((pick.targetPrice - currentPrice) / currentPrice * 100).toFixed(0);
+                
+                document.getElementById('daily-price').textContent = formatCurrency(currentPrice);
+                document.getElementById('daily-target').textContent = formatCurrency(pick.targetPrice, 0);
+                document.getElementById('daily-upside').textContent = `+${upside}%`;
+            } else {
+                document.getElementById('daily-price').textContent = 'Loading...';
+                document.getElementById('daily-target').textContent = formatCurrency(pick.targetPrice, 0);
+                document.getElementById('daily-upside').textContent = '---';
+            }
+        }
+
         // Initial fetch and set up refresh
         async function init() {
             await Promise.all([
+                updateDailyPick(),
                 fetchBitcoinData(),
                 fetchShopifyData(),
                 fetchIndexData(),
