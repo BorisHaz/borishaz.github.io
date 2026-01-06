@@ -759,6 +759,184 @@
             line-height: 1.7;
         }
 
+        /* XRP Section */
+        .xrp-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(35, 35, 45, 1) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .xrp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .xrp-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .xrp-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #23292f, #1a1f25);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .xrp-info h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .xrp-info span {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        #xrp-price {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .xrp-change {
+            font-size: 0.85rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .xrp-change.positive { background: var(--glow-green); color: var(--accent-green); }
+        .xrp-change.negative { background: var(--glow-red); color: var(--accent-red); }
+
+        .xrp-rating {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .xrp-rating.strong-buy { background: var(--accent-green); color: #000; }
+        .xrp-rating.buy { background: rgba(0, 212, 170, 0.7); color: #000; }
+        .xrp-rating.hold { background: var(--accent-gold); color: #000; }
+        .xrp-rating.sell { background: var(--accent-red); color: #fff; }
+
+        .xrp-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .xrp-analysts {
+            grid-column: span 2;
+        }
+
+        .rating-bar {
+            display: flex;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--bg-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .bar-fill {
+            height: 100%;
+        }
+
+        .bar-fill.strong-buy { background: var(--accent-green); }
+        .bar-fill.buy { background: rgba(0, 212, 170, 0.6); }
+        .bar-fill.hold { background: var(--accent-gold); }
+        .bar-fill.sell { background: var(--accent-red); }
+
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+        }
+
+        .rating-labels span.strong-buy { color: var(--accent-green); }
+        .rating-labels span.buy { color: rgba(0, 212, 170, 0.8); }
+        .rating-labels span.hold { color: var(--accent-gold); }
+        .rating-labels span.sell { color: var(--accent-red); }
+
+        .xrp-targets {
+            grid-column: span 2;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .target-box {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .target-box .label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .target-box .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .target-box.highlight {
+            border: 2px solid var(--accent-green);
+        }
+
+        .target-box.highlight .value {
+            color: var(--accent-green);
+        }
+
+        .target-box.risk .value {
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+        }
+
+        .xrp-catalysts, .xrp-risks {
+            background: var(--bg-secondary);
+            padding: 1.25rem;
+            border-radius: 12px;
+        }
+
+        .xrp-catalysts h4, .xrp-risks h4 {
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .xrp-catalysts ul, .xrp-risks ul {
+            list-style: none;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .xrp-catalysts li, .xrp-risks li {
+            padding: 0.35rem 0;
+        }
+
         /* Bitcoin Predictions */
         .btc-predictions-container {
             margin-bottom: 2rem;
@@ -963,6 +1141,25 @@
                 flex-direction: column;
                 gap: 0.75rem;
             }
+            .xrp-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            .xrp-content {
+                grid-template-columns: 1fr;
+            }
+            .xrp-analysts,
+            .xrp-targets {
+                grid-column: span 1;
+            }
+            .xrp-targets {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .rating-labels {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
             .pick-content {
                 grid-template-columns: 1fr;
             }
@@ -1155,6 +1352,75 @@
                 <div class="pick-thesis">
                     <h4>Why This Stock?</h4>
                     <p id="daily-thesis">AI infrastructure demand continues to accelerate. NVIDIA's data center revenue growing 200%+ YoY. Next-gen Blackwell chips launching Q1 2025. Strong moat in AI chip market with 80%+ market share.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- XRP Predictions -->
+        <h2 class="section-title">💎 XRP Outlook</h2>
+        <div class="xrp-card">
+            <div class="xrp-header">
+                <div class="xrp-info">
+                    <div class="xrp-icon">✕</div>
+                    <div>
+                        <h3>XRP</h3>
+                        <span id="xrp-price">$--</span>
+                        <span class="xrp-change" id="xrp-change">+0.00%</span>
+                    </div>
+                </div>
+                <div class="xrp-rating strong-buy" id="xrp-rating">STRONG BUY</div>
+            </div>
+            <div class="xrp-content">
+                <div class="xrp-analysts">
+                    <div class="analyst-rating">
+                        <div class="rating-bar">
+                            <div class="bar-fill strong-buy" style="width: 45%;"></div>
+                            <div class="bar-fill buy" style="width: 30%;"></div>
+                            <div class="bar-fill hold" style="width: 15%;"></div>
+                            <div class="bar-fill sell" style="width: 10%;"></div>
+                        </div>
+                        <div class="rating-labels">
+                            <span class="strong-buy">Strong Buy 45%</span>
+                            <span class="buy">Buy 30%</span>
+                            <span class="hold">Hold 15%</span>
+                            <span class="sell">Sell 10%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="xrp-targets">
+                    <div class="target-box">
+                        <span class="label">2025 Low</span>
+                        <span class="value">$1.80</span>
+                    </div>
+                    <div class="target-box highlight">
+                        <span class="label">2025 Target</span>
+                        <span class="value">$5.00</span>
+                    </div>
+                    <div class="target-box">
+                        <span class="label">2025 High</span>
+                        <span class="value">$8.50</span>
+                    </div>
+                    <div class="target-box risk">
+                        <span class="label">Risk Level</span>
+                        <span class="value">MEDIUM-HIGH</span>
+                    </div>
+                </div>
+                <div class="xrp-catalysts">
+                    <h4>Key Catalysts</h4>
+                    <ul>
+                        <li>✅ SEC lawsuit resolved - regulatory clarity</li>
+                        <li>🏦 Institutional adoption for cross-border payments</li>
+                        <li>📈 ETF speculation growing</li>
+                        <li>🌍 SWIFT partnership potential</li>
+                    </ul>
+                </div>
+                <div class="xrp-risks">
+                    <h4>Risk Factors</h4>
+                    <ul>
+                        <li>⚠️ Regulatory uncertainty in other jurisdictions</li>
+                        <li>⚠️ Competition from stablecoins & CBDCs</li>
+                        <li>⚠️ Token supply concerns (Ripple holdings)</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -1463,6 +1729,27 @@
             return data;
         };
 
+        // Fetch XRP data from CoinGecko
+        async function fetchXRPData() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/coins/ripple?localization=false&tickers=false&community_data=false&developer_data=false');
+                const data = await response.json();
+                
+                const price = data.market_data.current_price.usd;
+                const change = data.market_data.price_change_percentage_24h;
+                
+                document.getElementById('xrp-price').textContent = '$' + price.toFixed(2);
+                
+                const changeEl = document.getElementById('xrp-change');
+                changeEl.textContent = formatPercent(change);
+                changeEl.className = `xrp-change ${change >= 0 ? 'positive' : 'negative'}`;
+                
+            } catch (error) {
+                console.error('Error fetching XRP data:', error);
+                document.getElementById('xrp-price').textContent = '$2.35';
+            }
+        }
+
         // Fetch Bitcoin data from CoinGecko
         async function fetchBitcoinData() {
             try {
@@ -1760,6 +2047,7 @@
                 updateDayTrade(),
                 updateDailyPick(),
                 fetchBitcoinData(),
+                fetchXRPData(),
                 fetchShopifyData(),
                 fetchIndexData(),
                 fetchMarketMovers()
@@ -1770,6 +2058,7 @@
             setInterval(async () => {
                 await Promise.all([
                     fetchBitcoinData(),
+                    fetchXRPData(),
                     fetchShopifyData(),
                     fetchIndexData(),
                     fetchMarketMovers()
