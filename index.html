@@ -455,6 +455,282 @@
             text-decoration: none;
         }
 
+        /* Stock Search */
+        .stock-search-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(74, 158, 255, 0.3);
+        }
+
+        .search-results {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .result-stock-info h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-stock-info span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .signal-badge {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .signal-badge.strong-buy { background: var(--accent-green); color: #000; }
+        .signal-badge.buy { background: rgba(0, 212, 170, 0.7); color: #000; }
+        .signal-badge.hold { background: var(--accent-gold); color: #000; }
+        .signal-badge.sell { background: rgba(255, 71, 87, 0.7); color: #fff; }
+        .signal-badge.strong-sell { background: var(--accent-red); color: #fff; }
+
+        .results-price {
+            margin-bottom: 1.5rem;
+        }
+
+        .current-price {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .current-price .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .current-price .price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .current-price .change {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        .current-price .change.positive { background: var(--glow-green); color: var(--accent-green); }
+        .current-price .change.negative { background: var(--glow-red); color: var(--accent-red); }
+
+        .results-metrics {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-metrics .metric {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .results-metrics .label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-metrics .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .results-analysis {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-analysis h4 {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .analysis-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .analysis-item .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            min-width: 100px;
+        }
+
+        .position-bar {
+            flex: 1;
+            height: 10px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-gold), var(--accent-green));
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .position-marker {
+            position: absolute;
+            top: -5px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 3px solid var(--bg-primary);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .position-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .signal-reasons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .reason {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .reason.bullish { border-left: 3px solid var(--accent-green); }
+        .reason.bearish { border-left: 3px solid var(--accent-red); }
+        .reason.neutral { border-left: 3px solid var(--accent-gold); }
+
+        .results-summary {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .results-summary h4 {
+            margin-bottom: 0.75rem;
+            color: var(--accent-blue);
+        }
+
+        .results-summary p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .search-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .search-error {
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--accent-red);
+            background: var(--glow-red);
+            border-radius: 12px;
+        }
+
         /* Day Trade Pick */
         .day-trade-card {
             background: linear-gradient(135deg, var(--bg-card) 0%, rgba(249, 115, 22, 0.1) 100%);
@@ -1127,6 +1403,32 @@
             .price-value {
                 font-size: 1.75rem;
             }
+            .search-box {
+                flex-direction: column;
+            }
+            .search-box button {
+                width: 100%;
+            }
+            .results-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            .results-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .current-price {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .current-price .price {
+                font-size: 2rem;
+            }
+            .analysis-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
             .trade-content {
                 grid-template-columns: 1fr;
             }
@@ -1268,6 +1570,86 @@
                     <div class="change-badge positive" id="nasdaq-change">+0.00%</div>
                 </div>
                 <div class="price-value" id="nasdaq-price">--,---</div>
+            </div>
+        </div>
+
+        <!-- Stock Search -->
+        <h2 class="section-title">🔍 Stock Lookup</h2>
+        <div class="stock-search-container">
+            <div class="search-box">
+                <input type="text" id="stock-search-input" placeholder="Enter stock symbol (e.g., AAPL, TSLA, MSFT)" autocomplete="off">
+                <button id="stock-search-btn" onclick="searchStock()">Analyze</button>
+            </div>
+            <div class="search-results" id="search-results" style="display: none;">
+                <div class="results-header">
+                    <div class="result-stock-info">
+                        <h3 id="result-symbol">AAPL</h3>
+                        <span id="result-name">Apple Inc.</span>
+                    </div>
+                    <div class="result-signal" id="result-signal">
+                        <span class="signal-badge buy">BUY</span>
+                    </div>
+                </div>
+                <div class="results-price">
+                    <div class="current-price">
+                        <span class="label">Current Price</span>
+                        <span class="price" id="result-price">$0.00</span>
+                        <span class="change" id="result-change">+0.00%</span>
+                    </div>
+                </div>
+                <div class="results-metrics">
+                    <div class="metric">
+                        <span class="label">Market Cap</span>
+                        <span class="value" id="result-mcap">$0B</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">52W High</span>
+                        <span class="value" id="result-52high">$0.00</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">52W Low</span>
+                        <span class="value" id="result-52low">$0.00</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Volume</span>
+                        <span class="value" id="result-volume">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Avg Volume</span>
+                        <span class="value" id="result-avgvol">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">P/E Ratio</span>
+                        <span class="value" id="result-pe">--</span>
+                    </div>
+                </div>
+                <div class="results-analysis">
+                    <h4>📊 Technical Analysis</h4>
+                    <div class="analysis-bars">
+                        <div class="analysis-item">
+                            <span class="label">52W Position</span>
+                            <div class="position-bar">
+                                <div class="position-fill" id="result-52w-position"></div>
+                                <div class="position-marker" id="result-position-marker"></div>
+                            </div>
+                            <span class="position-text" id="result-position-text">50%</span>
+                        </div>
+                    </div>
+                    <div class="signal-reasons" id="signal-reasons">
+                        <div class="reason">Loading analysis...</div>
+                    </div>
+                </div>
+                <div class="results-summary">
+                    <h4>📝 Summary</h4>
+                    <p id="result-summary">Loading...</p>
+                </div>
+            </div>
+            <div class="search-loading" id="search-loading" style="display: none;">
+                <div class="spinner"></div>
+                <span>Analyzing stock...</span>
+            </div>
+            <div class="search-error" id="search-error" style="display: none;">
+                <span>⚠️ Stock not found. Please check the symbol and try again.</span>
             </div>
         </div>
 
@@ -2040,6 +2422,190 @@
                 document.getElementById('daily-upside').textContent = `+${upside}%`;
             }
         }
+
+        // Stock search functionality
+        async function searchStock() {
+            const input = document.getElementById('stock-search-input');
+            const symbol = input.value.trim().toUpperCase();
+            
+            if (!symbol) return;
+            
+            // Show loading, hide others
+            document.getElementById('search-results').style.display = 'none';
+            document.getElementById('search-error').style.display = 'none';
+            document.getElementById('search-loading').style.display = 'flex';
+            
+            try {
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
+                
+                const response = await fetchWithTimeout(proxyUrl + encodeURIComponent(yahooUrl), 8000);
+                const data = await response.json();
+                
+                if (!data.chart || !data.chart.result || !data.chart.result[0]) {
+                    throw new Error('Stock not found');
+                }
+                
+                const result = data.chart.result[0];
+                const meta = result.meta;
+                const quotes = result.indicators.quote[0];
+                
+                const price = meta.regularMarketPrice;
+                const previousClose = meta.chartPreviousClose || meta.previousClose;
+                const change = previousClose ? ((price - previousClose) / previousClose) * 100 : 0;
+                const high52 = meta.fiftyTwoWeekHigh;
+                const low52 = meta.fiftyTwoWeekLow;
+                const volume = meta.regularMarketVolume;
+                const avgVolume = quotes.volume ? quotes.volume.filter(v => v).reduce((a, b) => a + b, 0) / quotes.volume.filter(v => v).length : 0;
+                const marketCap = meta.marketCap;
+                
+                // Calculate 52-week position (0-100%)
+                const range52 = high52 - low52;
+                const position52 = range52 > 0 ? ((price - low52) / range52) * 100 : 50;
+                
+                // Determine signal based on multiple factors
+                const signal = calculateSignal(price, change, position52, volume, avgVolume);
+                
+                // Update UI
+                document.getElementById('result-symbol').textContent = symbol;
+                document.getElementById('result-name').textContent = meta.shortName || meta.symbol || symbol;
+                document.getElementById('result-price').textContent = formatCurrency(price);
+                
+                const changeEl = document.getElementById('result-change');
+                changeEl.textContent = formatPercent(change);
+                changeEl.className = `change ${change >= 0 ? 'positive' : 'negative'}`;
+                
+                document.getElementById('result-mcap').textContent = marketCap ? formatMarketCap(marketCap) : '--';
+                document.getElementById('result-52high').textContent = formatCurrency(high52);
+                document.getElementById('result-52low').textContent = formatCurrency(low52);
+                document.getElementById('result-volume').textContent = formatVolume(volume);
+                document.getElementById('result-avgvol').textContent = formatVolume(avgVolume);
+                document.getElementById('result-pe').textContent = '--';
+                
+                // Update position bar
+                document.getElementById('result-position-marker').style.left = `${position52}%`;
+                document.getElementById('result-position-text').textContent = `${position52.toFixed(0)}%`;
+                
+                // Update signal badge
+                const signalBadge = document.querySelector('.signal-badge');
+                signalBadge.textContent = signal.label;
+                signalBadge.className = `signal-badge ${signal.class}`;
+                
+                // Update reasons
+                document.getElementById('signal-reasons').innerHTML = signal.reasons.map(r => 
+                    `<div class="reason ${r.type}">${r.text}</div>`
+                ).join('');
+                
+                // Update summary
+                document.getElementById('result-summary').textContent = signal.summary;
+                
+                // Show results
+                document.getElementById('search-loading').style.display = 'none';
+                document.getElementById('search-results').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                document.getElementById('search-loading').style.display = 'none';
+                document.getElementById('search-error').style.display = 'block';
+            }
+        }
+
+        function calculateSignal(price, change, position52, volume, avgVolume) {
+            let score = 0;
+            const reasons = [];
+            
+            // Position in 52-week range
+            if (position52 < 20) {
+                score -= 1;
+                reasons.push({ type: 'bearish', text: '📉 Near 52-week low' });
+            } else if (position52 < 40) {
+                score += 1;
+                reasons.push({ type: 'bullish', text: '💰 Potential value zone' });
+            } else if (position52 > 80) {
+                score += 0.5;
+                reasons.push({ type: 'neutral', text: '🔝 Near 52-week high' });
+            } else if (position52 > 60) {
+                score += 1;
+                reasons.push({ type: 'bullish', text: '📈 Strong momentum' });
+            } else {
+                reasons.push({ type: 'neutral', text: '↔️ Mid-range position' });
+            }
+            
+            // Daily change
+            if (change > 3) {
+                score += 1;
+                reasons.push({ type: 'bullish', text: '🚀 Strong daily gain' });
+            } else if (change > 1) {
+                score += 0.5;
+                reasons.push({ type: 'bullish', text: '✅ Positive momentum' });
+            } else if (change < -3) {
+                score -= 1;
+                reasons.push({ type: 'bearish', text: '⚠️ Sharp decline today' });
+            } else if (change < -1) {
+                score -= 0.5;
+                reasons.push({ type: 'bearish', text: '📉 Negative momentum' });
+            }
+            
+            // Volume analysis
+            if (avgVolume > 0) {
+                const volumeRatio = volume / avgVolume;
+                if (volumeRatio > 1.5) {
+                    score += 0.5;
+                    reasons.push({ type: 'bullish', text: '📊 High volume activity' });
+                } else if (volumeRatio < 0.5) {
+                    reasons.push({ type: 'neutral', text: '😴 Low volume today' });
+                }
+            }
+            
+            // Determine signal
+            let signal;
+            if (score >= 2) {
+                signal = { label: 'STRONG BUY', class: 'strong-buy' };
+            } else if (score >= 1) {
+                signal = { label: 'BUY', class: 'buy' };
+            } else if (score <= -2) {
+                signal = { label: 'STRONG SELL', class: 'strong-sell' };
+            } else if (score <= -1) {
+                signal = { label: 'SELL', class: 'sell' };
+            } else {
+                signal = { label: 'HOLD', class: 'hold' };
+            }
+            
+            // Generate summary
+            const summaries = {
+                'strong-buy': `${document.getElementById('stock-search-input').value.toUpperCase()} shows strong bullish signals. The stock is displaying positive momentum with favorable technical indicators. Consider this as a potential buying opportunity, but always do your own research and consider your risk tolerance.`,
+                'buy': `${document.getElementById('stock-search-input').value.toUpperCase()} presents a moderate buy signal. Technical indicators lean positive. This could be a good entry point for long-term investors. Monitor for confirmation of the uptrend.`,
+                'hold': `${document.getElementById('stock-search-input').value.toUpperCase()} is showing mixed signals. The stock is trading in a neutral zone with no clear directional bias. Consider holding current positions and waiting for clearer signals before making new moves.`,
+                'sell': `${document.getElementById('stock-search-input').value.toUpperCase()} is showing bearish signals. Consider reducing exposure or tightening stop losses. Wait for stabilization before considering new positions.`,
+                'strong-sell': `${document.getElementById('stock-search-input').value.toUpperCase()} displays concerning bearish indicators. Strong caution is advised. Consider reducing positions and waiting for a trend reversal before re-entering.`
+            };
+            
+            signal.summary = summaries[signal.class];
+            signal.reasons = reasons;
+            
+            return signal;
+        }
+
+        function formatMarketCap(cap) {
+            if (cap >= 1e12) return `$${(cap / 1e12).toFixed(2)}T`;
+            if (cap >= 1e9) return `$${(cap / 1e9).toFixed(2)}B`;
+            if (cap >= 1e6) return `$${(cap / 1e6).toFixed(2)}M`;
+            return `$${cap.toLocaleString()}`;
+        }
+
+        function formatVolume(vol) {
+            if (vol >= 1e9) return `${(vol / 1e9).toFixed(2)}B`;
+            if (vol >= 1e6) return `${(vol / 1e6).toFixed(2)}M`;
+            if (vol >= 1e3) return `${(vol / 1e3).toFixed(0)}K`;
+            return vol.toLocaleString();
+        }
+
+        // Add enter key support for search
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('stock-search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchStock();
+            });
+        });
 
         // Initial fetch and set up refresh
         async function init() {
