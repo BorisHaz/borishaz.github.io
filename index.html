@@ -1971,8 +1971,9 @@
 
         // Fallback prices - only used if API fails (updated Jan 2025)
         // These are backup values, live data is always preferred
+        // Fallback prices (Jan 2026) - used only if ALL APIs fail
         const fallbackPrices = {
-            'SHOP': { price: 115.00, change: 0, marketCap: 150e9, volume: 5e6 },
+            'SHOP': { price: 167.00, change: 0, marketCap: 215e9, volume: 5e6 },
             'NVDA': { price: 140.00, change: 0, marketCap: 3.4e12, volume: 40e6 },
             'AMZN': { price: 220.00, change: 0, marketCap: 2.3e12, volume: 30e6 },
             'GOOGL': { price: 195.00, change: 0, marketCap: 2.4e12, volume: 20e6 },
@@ -2002,35 +2003,67 @@
             }
         }
 
-        // Fetch stock data from Yahoo Finance via CORS proxy
+        // List of CORS proxies to try
+        const corsProxies = [
+            (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+            (url) => `https://proxy.cors.sh/${url}`,
+        ];
+
+        // Fetch stock data from Yahoo Finance via CORS proxy (with fallbacks)
         async function fetchYahooStock(symbol) {
+            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`;
+            
+            // Try each proxy until one works
+            for (const proxyFn of corsProxies) {
+                try {
+                    const proxyUrl = proxyFn(yahooUrl);
+                    const response = await fetchWithTimeout(proxyUrl, 4000);
+                    
+                    if (!response.ok) continue;
+                    
+                    const data = await response.json();
+                    
+                    if (data.chart && data.chart.result && data.chart.result[0]) {
+                        const result = data.chart.result[0];
+                        const meta = result.meta;
+                        const price = meta.regularMarketPrice;
+                        const previousClose = meta.chartPreviousClose || meta.previousClose;
+                        const change = previousClose ? ((price - previousClose) / previousClose) * 100 : 0;
+                        
+                        return {
+                            price: price,
+                            change: change,
+                            volume: meta.regularMarketVolume,
+                            marketCap: meta.marketCap
+                        };
+                    }
+                } catch (error) {
+                    console.log(`Proxy failed for ${symbol}, trying next...`);
+                    continue;
+                }
+            }
+            
+            // All proxies failed, try direct Finnhub API as backup
             try {
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`;
-                
-                const response = await fetchWithTimeout(proxyUrl + encodeURIComponent(yahooUrl), 5000);
+                const finnhubUrl = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=demo`;
+                const response = await fetchWithTimeout(finnhubUrl, 4000);
                 const data = await response.json();
                 
-                if (data.chart && data.chart.result && data.chart.result[0]) {
-                    const result = data.chart.result[0];
-                    const meta = result.meta;
-                    const price = meta.regularMarketPrice;
-                    const previousClose = meta.chartPreviousClose || meta.previousClose;
-                    const change = previousClose ? ((price - previousClose) / previousClose) * 100 : 0;
-                    
+                if (data.c && data.c > 0) {
                     return {
-                        price: price,
-                        change: change,
-                        volume: meta.regularMarketVolume,
-                        marketCap: meta.marketCap
+                        price: data.c,
+                        change: data.dp || 0,
+                        volume: 0,
+                        marketCap: 0
                     };
                 }
-                // Return fallback if API response is malformed
-                return fallbackPrices[symbol] || null;
-            } catch (error) {
-                console.error(`Error fetching ${symbol}, using fallback:`, error);
-                return fallbackPrices[symbol] || null;
+            } catch (e) {
+                console.log('Finnhub backup also failed');
             }
+            
+            console.error(`All APIs failed for ${symbol}, using fallback`);
+            return fallbackPrices[symbol] || null;
         }
 
         // Fetch Shopify data from Yahoo Finance
