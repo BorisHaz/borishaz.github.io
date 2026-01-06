@@ -2112,13 +2112,13 @@
 
         // Day trade picks - high volatility stocks for intraday
         const dayTrades = [
-            { symbol: 'TSLA', name: 'Tesla Inc.', entryLow: 405, entryHigh: 415, targetLow: 425, targetHigh: 435, stopLoss: 398, rr: '1:2.5', thesis: 'High volatility expected with pre-market momentum. Look for breakout above resistance with volume confirmation. Trail stop on partial profits.' },
-            { symbol: 'NVDA', name: 'NVIDIA Corporation', entryLow: 145, entryHigh: 150, targetLow: 155, targetHigh: 160, stopLoss: 142, rr: '1:2', thesis: 'AI sector momentum play. Watch for gap fills and VWAP bounces. Strong institutional buying on dips. Scale in at entry zone.' },
-            { symbol: 'AMD', name: 'Advanced Micro Devices', entryLow: 118, entryHigh: 122, targetLow: 128, targetHigh: 132, stopLoss: 115, rr: '1:2.3', thesis: 'Semiconductor sector rotation candidate. Technical breakout setup forming. Volume surge expected near open.' },
-            { symbol: 'META', name: 'Meta Platforms Inc.', entryLow: 610, entryHigh: 620, targetLow: 635, targetHigh: 645, stopLoss: 600, rr: '1:2', thesis: 'Social media strength with AI integration catalyst. Look for opening range breakout. Tight risk management required.' },
-            { symbol: 'COIN', name: 'Coinbase Global', entryLow: 275, entryHigh: 285, targetLow: 300, targetHigh: 310, stopLoss: 265, rr: '1:2.5', thesis: 'Crypto correlation play - follows BTC moves. High beta, high reward. Wait for crypto market direction confirmation.' },
-            { symbol: 'MSTR', name: 'MicroStrategy Inc.', entryLow: 380, entryHigh: 395, targetLow: 420, targetHigh: 440, stopLoss: 365, rr: '1:2.2', thesis: 'Bitcoin proxy with leverage. Extreme volatility - size positions accordingly. Best for experienced traders.' },
-            { symbol: 'SPY', name: 'SPDR S&P 500 ETF', entryLow: 592, entryHigh: 595, targetLow: 600, targetHigh: 603, stopLoss: 589, rr: '1:1.5', thesis: 'Index play for steady moves. Lower risk than individual stocks. Good for scalping during high volume hours.' }
+            { symbol: 'TSLA', name: 'Tesla Inc.', entryPct: 0.5, targetPct: 2.5, stopPct: 1.5, rr: '1:2.5', thesis: 'High volatility expected with pre-market momentum. Look for breakout above resistance with volume confirmation. Trail stop on partial profits.' },
+            { symbol: 'NVDA', name: 'NVIDIA Corporation', entryPct: 0.5, targetPct: 2.0, stopPct: 1.0, rr: '1:2', thesis: 'AI sector momentum play. Watch for gap fills and VWAP bounces. Strong institutional buying on dips. Scale in at entry zone.' },
+            { symbol: 'AMD', name: 'Advanced Micro Devices', entryPct: 0.5, targetPct: 2.3, stopPct: 1.0, rr: '1:2.3', thesis: 'Semiconductor sector rotation candidate. Technical breakout setup forming. Volume surge expected near open.' },
+            { symbol: 'META', name: 'Meta Platforms Inc.', entryPct: 0.5, targetPct: 2.0, stopPct: 1.0, rr: '1:2', thesis: 'Social media strength with AI integration catalyst. Look for opening range breakout. Tight risk management required.' },
+            { symbol: 'COIN', name: 'Coinbase Global', entryPct: 1.0, targetPct: 3.0, stopPct: 1.5, rr: '1:2.5', thesis: 'Crypto correlation play - follows BTC moves. High beta, high reward. Wait for crypto market direction confirmation.' },
+            { symbol: 'MSTR', name: 'MicroStrategy Inc.', entryPct: 1.0, targetPct: 3.5, stopPct: 1.5, rr: '1:2.2', thesis: 'Bitcoin proxy with leverage. Extreme volatility - size positions accordingly. Best for experienced traders.' },
+            { symbol: 'SPY', name: 'SPDR S&P 500 ETF', entryPct: 0.2, targetPct: 0.5, stopPct: 0.3, rr: '1:1.5', thesis: 'Index play for steady moves. Lower risk than individual stocks. Good for scalping during high volume hours.' }
         ];
 
         // Check if US market is open
@@ -2160,23 +2160,39 @@
             // Update trade info
             document.getElementById('trade-symbol').textContent = trade.symbol;
             document.getElementById('trade-name').textContent = trade.name;
-            document.getElementById('trade-entry').textContent = `$${trade.entryLow} - $${trade.entryHigh}`;
-            document.getElementById('trade-target').textContent = `$${trade.targetLow} - $${trade.targetHigh}`;
-            document.getElementById('trade-stop').textContent = `$${trade.stopLoss}`;
             document.getElementById('trade-rr').textContent = trade.rr;
             document.getElementById('trade-thesis').textContent = trade.thesis;
             
-            // Show fallback price first
-            const fallback = fallbackPrices[trade.symbol];
-            if (fallback) {
-                document.getElementById('trade-current-price').textContent = formatCurrency(fallback.price);
+            // Show loading state
+            document.getElementById('trade-current-price').textContent = 'Loading...';
+            document.getElementById('trade-entry').textContent = 'Calculating...';
+            document.getElementById('trade-target').textContent = 'Calculating...';
+            document.getElementById('trade-stop').textContent = 'Calculating...';
+            
+            // Fetch real price and calculate dynamic zones
+            const stockData = await fetchYahooStock(trade.symbol);
+            let currentPrice;
+            
+            if (stockData && stockData.price) {
+                currentPrice = stockData.price;
+            } else {
+                // Use fallback
+                const fallback = fallbackPrices[trade.symbol];
+                currentPrice = fallback ? fallback.price : 100;
             }
             
-            // Fetch real price
-            const stockData = await fetchYahooStock(trade.symbol);
-            if (stockData && stockData.price) {
-                document.getElementById('trade-current-price').textContent = formatCurrency(stockData.price);
-            }
+            // Calculate dynamic entry/target/stop based on current price
+            const entryLow = currentPrice * (1 - trade.entryPct / 100);
+            const entryHigh = currentPrice * (1 + trade.entryPct / 100);
+            const targetLow = currentPrice * (1 + trade.targetPct / 100 * 0.7);
+            const targetHigh = currentPrice * (1 + trade.targetPct / 100);
+            const stopLoss = currentPrice * (1 - trade.stopPct / 100);
+            
+            // Update UI with calculated values
+            document.getElementById('trade-current-price').textContent = formatCurrency(currentPrice);
+            document.getElementById('trade-entry').textContent = `${formatCurrency(entryLow)} - ${formatCurrency(entryHigh)}`;
+            document.getElementById('trade-target').textContent = `${formatCurrency(targetLow)} - ${formatCurrency(targetHigh)}`;
+            document.getElementById('trade-stop').textContent = formatCurrency(stopLoss);
         }
 
         // Daily stock picks - rotate based on day of week
