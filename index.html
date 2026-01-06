@@ -511,6 +511,7 @@
             color: var(--text-primary);
             outline: none;
             transition: border-color 0.3s;
+            text-transform: uppercase;
         }
 
         .search-box input:focus {
@@ -2244,9 +2245,15 @@
         // Stock search functionality
         async function searchStock() {
             const input = document.getElementById('stock-search-input');
-            const symbol = input.value.trim().toUpperCase();
+            let symbol = input.value.trim().toUpperCase();
+            
+            // Handle common variations
+            symbol = symbol.replace(/\s+/g, ''); // Remove spaces
             
             if (!symbol) return;
+            
+            // Update input to show uppercase
+            input.value = symbol;
             
             // Show loading, hide others
             document.getElementById('search-results').style.display = 'none';
