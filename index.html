@@ -760,6 +760,96 @@
             font-weight: 600;
         }
 
+        /* Valuation Metrics */
+        .valuation-metrics {
+            background: linear-gradient(135deg, var(--bg-secondary), rgba(100, 255, 218, 0.05));
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(100, 255, 218, 0.1);
+        }
+
+        .valuation-metrics h4 {
+            margin-bottom: 1rem;
+            color: var(--accent-green);
+        }
+
+        .valuation-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .valuation-card {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+        }
+
+        .valuation-card .val-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .valuation-card .val-value {
+            display: block;
+            font-size: 1.3rem;
+            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        .valuation-card .val-indicator {
+            display: block;
+            font-size: 0.7rem;
+            margin-top: 0.25rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .val-indicator.undervalued {
+            background: rgba(100, 255, 218, 0.2);
+            color: var(--accent-green);
+        }
+
+        .val-indicator.fair {
+            background: rgba(255, 213, 79, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .val-indicator.overvalued {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .valuation-summary {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .valuation-summary .verdict {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .valuation-summary .verdict.bullish { color: var(--accent-green); }
+        .valuation-summary .verdict.bearish { color: #ff6b6b; }
+        .valuation-summary .verdict.neutral { color: var(--accent-gold); }
+
+        @media (max-width: 600px) {
+            .valuation-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         /* Company Profile */
         .company-profile {
             background: var(--bg-secondary);
@@ -2199,6 +2289,36 @@
                         <span class="value" id="result-dividend">--</span>
                     </div>
                 </div>
+                
+                <!-- Key Valuation Metrics -->
+                <div class="valuation-metrics" id="valuation-metrics">
+                    <h4>📊 Valuation Metrics</h4>
+                    <div class="valuation-grid">
+                        <div class="valuation-card">
+                            <span class="val-label">Forward P/E</span>
+                            <span class="val-value" id="val-forward-pe">--</span>
+                            <span class="val-indicator" id="val-forward-pe-ind"></span>
+                        </div>
+                        <div class="valuation-card">
+                            <span class="val-label">PEG Ratio</span>
+                            <span class="val-value" id="val-peg">--</span>
+                            <span class="val-indicator" id="val-peg-ind"></span>
+                        </div>
+                        <div class="valuation-card">
+                            <span class="val-label">Price/Book</span>
+                            <span class="val-value" id="val-pb">--</span>
+                            <span class="val-indicator" id="val-pb-ind"></span>
+                        </div>
+                        <div class="valuation-card">
+                            <span class="val-label">Market Cap</span>
+                            <span class="val-value" id="val-mcap">--</span>
+                            <span class="val-indicator" id="val-mcap-ind"></span>
+                        </div>
+                    </div>
+                    <div class="valuation-summary" id="valuation-summary">
+                        <!-- Valuation summary will appear here -->
+                    </div>
+                </div>
 
                 <!-- Company Profile -->
                 <div class="company-profile" id="company-profile" style="display: none;">
@@ -2308,6 +2428,10 @@
                         <div class="source-meter" id="meter-technical">
                             <span class="source-name">📈 Technical</span>
                             <span class="source-signal neutral" id="signal-technical">--</span>
+                        </div>
+                        <div class="source-meter" id="meter-valuation">
+                            <span class="source-name">💰 Valuation</span>
+                            <span class="source-signal neutral" id="signal-valuation">--</span>
                         </div>
                     </div>
                     <div class="confluence-message" id="confluence-message"></div>
@@ -3433,7 +3557,68 @@
                 const low52 = meta.fiftyTwoWeekLow;
                 const volume = meta.regularMarketVolume;
                 const avgVolume = quotes.volume ? quotes.volume.filter(v => v).reduce((a, b) => a + b, 0) / quotes.volume.filter(v => v).length : 0;
-                const marketCap = meta.marketCap;
+                let marketCap = meta.marketCap;
+                
+                // Fetch detailed quote data from Yahoo Finance for P/E, EPS, etc.
+                let quoteData = null;
+                try {
+                    const quoteUrl = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=summaryDetail,defaultKeyStatistics,financialData,price`;
+                    const quoteResponse = await fetchWithProxy(quoteUrl, 5000);
+                    if (quoteResponse && quoteResponse.quoteSummary && quoteResponse.quoteSummary.result) {
+                        quoteData = quoteResponse.quoteSummary.result[0];
+                    }
+                } catch (e) {
+                    console.log('Could not fetch quote summary, trying alternative...');
+                    // Try alternative Yahoo endpoint
+                    try {
+                        const altUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+                        const altResponse = await fetchWithProxy(altUrl, 5000);
+                        if (altResponse && altResponse.quoteResponse && altResponse.quoteResponse.result) {
+                            const q = altResponse.quoteResponse.result[0];
+                            quoteData = {
+                                summaryDetail: {
+                                    trailingPE: { raw: q.trailingPE },
+                                    forwardPE: { raw: q.forwardPE },
+                                    dividendYield: { raw: q.dividendYield },
+                                    marketCap: { raw: q.marketCap },
+                                    fiftyTwoWeekHigh: { raw: q.fiftyTwoWeekHigh },
+                                    fiftyTwoWeekLow: { raw: q.fiftyTwoWeekLow }
+                                },
+                                defaultKeyStatistics: {
+                                    trailingEps: { raw: q.epsTrailingTwelveMonths },
+                                    forwardEps: { raw: q.epsForward },
+                                    pegRatio: { raw: q.pegRatio },
+                                    priceToBook: { raw: q.priceToBook }
+                                },
+                                price: {
+                                    shortName: q.shortName,
+                                    marketCap: { raw: q.marketCap }
+                                }
+                            };
+                        }
+                    } catch (e2) {
+                        console.log('Alternative quote fetch also failed');
+                    }
+                }
+                
+                // Extract financial metrics from quote data
+                let peRatio = null, epsValue = null, dividendYield = null, forwardPE = null, pegRatio = null, priceToBook = null;
+                
+                if (quoteData) {
+                    if (quoteData.summaryDetail) {
+                        peRatio = quoteData.summaryDetail.trailingPE?.raw;
+                        forwardPE = quoteData.summaryDetail.forwardPE?.raw;
+                        dividendYield = quoteData.summaryDetail.dividendYield?.raw;
+                        if (!marketCap && quoteData.summaryDetail.marketCap) {
+                            marketCap = quoteData.summaryDetail.marketCap.raw;
+                        }
+                    }
+                    if (quoteData.defaultKeyStatistics) {
+                        epsValue = quoteData.defaultKeyStatistics.trailingEps?.raw;
+                        pegRatio = quoteData.defaultKeyStatistics.pegRatio?.raw;
+                        priceToBook = quoteData.defaultKeyStatistics.priceToBook?.raw;
+                    }
+                }
                 
                 // Calculate 52-week position (0-100%)
                 const range52 = high52 - low52;
@@ -3585,8 +3770,19 @@
                     console.log('Could not fetch earnings data');
                 }
                 
-                // Determine signal based on multiple factors + analyst data + social sentiment
-                const signal = calculateSignal(price, change, position52, volume, avgVolume, analystData, socialSentiment);
+                // Prepare valuation data for signal calculation
+                const valuationData = {
+                    pe: peRatio,
+                    forwardPE: forwardPE,
+                    pegRatio: pegRatio,
+                    priceToBook: priceToBook,
+                    eps: epsValue,
+                    dividendYield: dividendYield,
+                    marketCap: marketCap
+                };
+                
+                // Determine signal based on multiple factors + analyst data + social sentiment + valuation
+                const signal = calculateSignal(price, change, position52, volume, avgVolume, analystData, socialSentiment, valuationData);
                 
                 // Update UI
                 document.getElementById('result-symbol').textContent = symbol;
@@ -3603,17 +3799,18 @@
                 document.getElementById('result-volume').textContent = formatVolume(volume);
                 document.getElementById('result-avgvol').textContent = formatVolume(avgVolume);
                 
-                // Update P/E, EPS, Dividend from financial metrics
-                if (financialMetrics && financialMetrics.metric) {
-                    const m = financialMetrics.metric;
-                    document.getElementById('result-pe').textContent = m.peBasicExclExtraTTM ? m.peBasicExclExtraTTM.toFixed(2) : '--';
-                    document.getElementById('result-eps').textContent = m.epsBasicExclExtraItemsTTM ? `$${m.epsBasicExclExtraItemsTTM.toFixed(2)}` : '--';
-                    document.getElementById('result-dividend').textContent = m.dividendYieldIndicatedAnnual ? `${m.dividendYieldIndicatedAnnual.toFixed(2)}%` : '--';
-                } else {
-                    document.getElementById('result-pe').textContent = '--';
-                    document.getElementById('result-eps').textContent = '--';
-                    document.getElementById('result-dividend').textContent = '--';
-                }
+                // Update P/E, EPS, Dividend - prioritize Yahoo Finance data, fallback to Finnhub
+                const displayPE = peRatio || (financialMetrics?.metric?.peBasicExclExtraTTM);
+                const displayEPS = epsValue || (financialMetrics?.metric?.epsBasicExclExtraItemsTTM);
+                const displayDividend = dividendYield || (financialMetrics?.metric?.dividendYieldIndicatedAnnual);
+                
+                document.getElementById('result-pe').textContent = displayPE ? displayPE.toFixed(2) : '--';
+                document.getElementById('result-eps').textContent = displayEPS ? `$${displayEPS.toFixed(2)}` : '--';
+                document.getElementById('result-dividend').textContent = displayDividend ? `${(displayDividend * 100).toFixed(2)}%` : '--';
+                
+                // Update Valuation Metrics section
+                const valuationMetrics = { pe: displayPE, forwardPE, pegRatio, priceToBook, marketCap, eps: displayEPS, dividend: displayDividend };
+                updateValuationMetrics(valuationMetrics, price);
                 
                 // Update company profile
                 if (companyProfile && companyProfile.name) {
@@ -3823,13 +4020,25 @@
                 document.getElementById('signal-technical').textContent = getSignalText(techSig);
                 document.getElementById('signal-technical').className = `source-signal ${getSignalClass(techSig)}`;
                 
+                // Determine valuation signal from reasons
+                let valSig = 'neutral';
+                signal.reasons.forEach(r => {
+                    if ((r.text.includes('💰') || r.text.includes('📊') || r.text.includes('📚') || r.text.includes('💵')) && r.type === 'bullish') valSig = 'bullish';
+                    if ((r.text.includes('💰') || r.text.includes('📊') || r.text.includes('❌')) && r.type === 'bearish') valSig = 'bearish';
+                });
+                document.getElementById('signal-valuation').textContent = getSignalText(valSig);
+                document.getElementById('signal-valuation').className = `source-signal ${getSignalClass(valSig)}`;
+                
                 // Update confluence message
                 const confMsg = document.getElementById('confluence-message');
-                if (conf.level >= 3) {
-                    confMsg.innerHTML = `<strong>🔥 PERFECT CONFLUENCE!</strong> All 3 sources agree: ${conf.type.toUpperCase()}`;
+                if (conf.level >= 4) {
+                    confMsg.innerHTML = `<strong>🔥 PERFECT CONFLUENCE!</strong> All 4 sources agree: ${conf.type.toUpperCase()}`;
+                    confMsg.className = 'confluence-message strong';
+                } else if (conf.level >= 3) {
+                    confMsg.innerHTML = `<strong>💪 STRONG CONFLUENCE!</strong> ${conf.level}/4 sources agree: ${conf.type.toUpperCase()}`;
                     confMsg.className = 'confluence-message strong';
                 } else if (conf.level >= 2) {
-                    confMsg.innerHTML = `✅ ${conf.level}/3 sources agree: ${conf.sources.join(' + ')} are ${conf.type}`;
+                    confMsg.innerHTML = `✅ ${conf.level}/4 sources agree: ${conf.sources.join(' + ')} are ${conf.type}`;
                     confMsg.className = 'confluence-message';
                 } else {
                     confMsg.innerHTML = `⚖️ Mixed signals - no clear consensus`;
@@ -3864,7 +4073,7 @@
             }
         }
 
-        function calculateSignal(price, change, position52, volume, avgVolume, analystData, socialSentiment) {
+        function calculateSignal(price, change, position52, volume, avgVolume, analystData, socialSentiment, valuationData) {
             let score = 0;
             const reasons = [];
             
@@ -3872,6 +4081,7 @@
             let analystSignal = 'neutral'; // bullish, bearish, neutral
             let socialSignal = 'neutral';
             let technicalSignal = 'neutral';
+            let valuationSignal = 'neutral';
             
             // 🏦 ANALYST RECOMMENDATIONS (highest weight)
             if (analystData) {
@@ -4012,8 +4222,65 @@
             
             score += techScore;
             
+            // 💰 VALUATION ANALYSIS
+            let valScore = 0;
+            if (valuationData) {
+                // P/E Ratio analysis
+                if (valuationData.pe && valuationData.pe > 0) {
+                    if (valuationData.pe < 15) {
+                        valScore += 0.5;
+                        reasons.push({ type: 'bullish', text: `💰 Low P/E ratio (${valuationData.pe.toFixed(1)}) - potential value` });
+                    } else if (valuationData.pe > 40) {
+                        valScore -= 0.25;
+                        reasons.push({ type: 'bearish', text: `💰 High P/E ratio (${valuationData.pe.toFixed(1)}) - expensive` });
+                    }
+                }
+                
+                // PEG Ratio analysis (most important for growth stocks)
+                if (valuationData.pegRatio && valuationData.pegRatio > 0) {
+                    if (valuationData.pegRatio < 1) {
+                        valScore += 1;
+                        reasons.push({ type: 'bullish', text: `📊 PEG < 1 (${valuationData.pegRatio.toFixed(2)}) - growth undervalued` });
+                    } else if (valuationData.pegRatio > 2.5) {
+                        valScore -= 0.5;
+                        reasons.push({ type: 'bearish', text: `📊 PEG > 2.5 (${valuationData.pegRatio.toFixed(2)}) - growth overpriced` });
+                    }
+                }
+                
+                // Price to Book analysis
+                if (valuationData.priceToBook && valuationData.priceToBook > 0) {
+                    if (valuationData.priceToBook < 1) {
+                        valScore += 0.75;
+                        reasons.push({ type: 'bullish', text: `📚 P/B < 1 (${valuationData.priceToBook.toFixed(2)}) - below book value` });
+                    } else if (valuationData.priceToBook > 15) {
+                        valScore -= 0.25;
+                    }
+                }
+                
+                // Dividend yield bonus
+                if (valuationData.dividendYield && valuationData.dividendYield > 0.03) {
+                    valScore += 0.25;
+                    reasons.push({ type: 'bullish', text: `💵 Strong dividend yield (${(valuationData.dividendYield * 100).toFixed(2)}%)` });
+                }
+                
+                // EPS positive is good
+                if (valuationData.eps && valuationData.eps > 0) {
+                    valScore += 0.25;
+                    reasons.push({ type: 'bullish', text: `✅ Positive EPS ($${valuationData.eps.toFixed(2)}) - profitable` });
+                } else if (valuationData.eps && valuationData.eps < 0) {
+                    valScore -= 0.5;
+                    reasons.push({ type: 'bearish', text: `❌ Negative EPS ($${valuationData.eps.toFixed(2)}) - unprofitable` });
+                }
+            }
+            
+            // Determine valuation signal
+            if (valScore >= 1) valuationSignal = 'bullish';
+            else if (valScore <= -0.5) valuationSignal = 'bearish';
+            
+            score += valScore;
+            
             // 🎯 CONFLUENCE BONUS - when multiple sources agree
-            const signals = [analystSignal, socialSignal, technicalSignal];
+            const signals = [analystSignal, socialSignal, technicalSignal, valuationSignal];
             const bullishCount = signals.filter(s => s === 'bullish').length;
             const bearishCount = signals.filter(s => s === 'bearish').length;
             
@@ -4030,9 +4297,10 @@
                 if (analystSignal === 'bullish') confluence.sources.push('Analysts');
                 if (socialSignal === 'bullish') confluence.sources.push('Social');
                 if (technicalSignal === 'bullish') confluence.sources.push('Technicals');
+                if (valuationSignal === 'bullish') confluence.sources.push('Valuation');
                 reasons.unshift({ 
                     type: 'bullish', 
-                    text: `🎯 CONFLUENCE: ${bullishCount}/3 sources BULLISH (${confluence.sources.join(' + ')})` 
+                    text: `🎯 CONFLUENCE: ${bullishCount}/4 sources BULLISH (${confluence.sources.join(' + ')})` 
                 });
             } else if (bearishCount >= 2) {
                 score -= 0.5 * bearishCount;
@@ -4041,9 +4309,10 @@
                 if (analystSignal === 'bearish') confluence.sources.push('Analysts');
                 if (socialSignal === 'bearish') confluence.sources.push('Social');
                 if (technicalSignal === 'bearish') confluence.sources.push('Technicals');
+                if (valuationSignal === 'bearish') confluence.sources.push('Valuation');
                 reasons.unshift({ 
                     type: 'bearish', 
-                    text: `🎯 CONFLUENCE: ${bearishCount}/3 sources BEARISH (${confluence.sources.join(' + ')})` 
+                    text: `🎯 CONFLUENCE: ${bearishCount}/4 sources BEARISH (${confluence.sources.join(' + ')})` 
                 });
             }
             
@@ -4077,6 +4346,144 @@
             signal.reasons = reasons;
             
             return signal;
+        }
+
+        function updateValuationMetrics(metrics, currentPrice) {
+            const { pe, forwardPE, pegRatio, priceToBook, marketCap, eps, dividend } = metrics;
+            
+            let valuationScore = 0;
+            let valuationReasons = [];
+            
+            // Forward P/E analysis
+            const fpeEl = document.getElementById('val-forward-pe');
+            const fpeIndEl = document.getElementById('val-forward-pe-ind');
+            if (forwardPE && forwardPE > 0) {
+                fpeEl.textContent = forwardPE.toFixed(2);
+                if (forwardPE < 15) {
+                    fpeIndEl.textContent = '✓ Undervalued';
+                    fpeIndEl.className = 'val-indicator undervalued';
+                    valuationScore += 1;
+                    valuationReasons.push('Low Forward P/E suggests potential upside');
+                } else if (forwardPE < 25) {
+                    fpeIndEl.textContent = '○ Fair';
+                    fpeIndEl.className = 'val-indicator fair';
+                } else {
+                    fpeIndEl.textContent = '⚠ High';
+                    fpeIndEl.className = 'val-indicator overvalued';
+                    valuationScore -= 0.5;
+                    valuationReasons.push('High Forward P/E may indicate overvaluation');
+                }
+            } else {
+                fpeEl.textContent = '--';
+                fpeIndEl.textContent = '';
+            }
+            
+            // PEG Ratio analysis (P/E divided by growth rate)
+            const pegEl = document.getElementById('val-peg');
+            const pegIndEl = document.getElementById('val-peg-ind');
+            if (pegRatio && pegRatio > 0) {
+                pegEl.textContent = pegRatio.toFixed(2);
+                if (pegRatio < 1) {
+                    pegIndEl.textContent = '✓ Undervalued';
+                    pegIndEl.className = 'val-indicator undervalued';
+                    valuationScore += 1.5;
+                    valuationReasons.push('PEG < 1 suggests growth not priced in');
+                } else if (pegRatio < 2) {
+                    pegIndEl.textContent = '○ Fair';
+                    pegIndEl.className = 'val-indicator fair';
+                } else {
+                    pegIndEl.textContent = '⚠ Expensive';
+                    pegIndEl.className = 'val-indicator overvalued';
+                    valuationScore -= 0.5;
+                }
+            } else {
+                pegEl.textContent = '--';
+                pegIndEl.textContent = '';
+            }
+            
+            // Price to Book analysis
+            const pbEl = document.getElementById('val-pb');
+            const pbIndEl = document.getElementById('val-pb-ind');
+            if (priceToBook && priceToBook > 0) {
+                pbEl.textContent = priceToBook.toFixed(2);
+                if (priceToBook < 1) {
+                    pbIndEl.textContent = '✓ Below book';
+                    pbIndEl.className = 'val-indicator undervalued';
+                    valuationScore += 1;
+                    valuationReasons.push('Trading below book value');
+                } else if (priceToBook < 3) {
+                    pbIndEl.textContent = '○ Fair';
+                    pbIndEl.className = 'val-indicator fair';
+                } else if (priceToBook < 10) {
+                    pbIndEl.textContent = '△ Growth';
+                    pbIndEl.className = 'val-indicator fair';
+                } else {
+                    pbIndEl.textContent = '⚠ Very high';
+                    pbIndEl.className = 'val-indicator overvalued';
+                }
+            } else {
+                pbEl.textContent = '--';
+                pbIndEl.textContent = '';
+            }
+            
+            // Market Cap categorization
+            const mcapEl = document.getElementById('val-mcap');
+            const mcapIndEl = document.getElementById('val-mcap-ind');
+            if (marketCap) {
+                mcapEl.textContent = formatMarketCap(marketCap);
+                if (marketCap >= 200e9) {
+                    mcapIndEl.textContent = 'Mega Cap';
+                    mcapIndEl.className = 'val-indicator fair';
+                } else if (marketCap >= 10e9) {
+                    mcapIndEl.textContent = 'Large Cap';
+                    mcapIndEl.className = 'val-indicator fair';
+                } else if (marketCap >= 2e9) {
+                    mcapIndEl.textContent = 'Mid Cap';
+                    mcapIndEl.className = 'val-indicator fair';
+                } else if (marketCap >= 300e6) {
+                    mcapIndEl.textContent = 'Small Cap';
+                    mcapIndEl.className = 'val-indicator undervalued';
+                    valuationReasons.push('Small cap - higher growth potential');
+                } else {
+                    mcapIndEl.textContent = 'Micro Cap';
+                    mcapIndEl.className = 'val-indicator undervalued';
+                }
+            } else {
+                mcapEl.textContent = '--';
+                mcapIndEl.textContent = '';
+            }
+            
+            // Generate valuation summary
+            const summaryEl = document.getElementById('valuation-summary');
+            let verdictClass, verdictText;
+            
+            if (valuationScore >= 2) {
+                verdictClass = 'bullish';
+                verdictText = '📈 UNDERVALUED - Multiple metrics suggest this stock may be trading below fair value.';
+            } else if (valuationScore >= 1) {
+                verdictClass = 'bullish';
+                verdictText = '📊 REASONABLY VALUED - Some positive valuation signals detected.';
+            } else if (valuationScore <= -1) {
+                verdictClass = 'bearish';
+                verdictText = '⚠️ POTENTIALLY OVERVALUED - Valuation metrics suggest caution.';
+            } else {
+                verdictClass = 'neutral';
+                verdictText = '⚖️ FAIR VALUE - Stock appears to be trading near fair value.';
+            }
+            
+            let summaryHTML = `<div class="verdict ${verdictClass}">${verdictText}</div>`;
+            if (valuationReasons.length > 0) {
+                summaryHTML += '<div class="reasons">' + valuationReasons.map(r => `• ${r}`).join('<br>') + '</div>';
+            }
+            
+            // Add key metrics summary
+            summaryHTML += '<div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-secondary);">';
+            if (pe) summaryHTML += `P/E: ${pe.toFixed(1)} | `;
+            if (eps) summaryHTML += `EPS: $${eps.toFixed(2)} | `;
+            if (dividend) summaryHTML += `Div: ${(dividend * 100).toFixed(2)}%`;
+            summaryHTML += '</div>';
+            
+            summaryEl.innerHTML = summaryHTML;
         }
 
         function formatMarketCap(cap) {
