@@ -3559,64 +3559,69 @@
                 const avgVolume = quotes.volume ? quotes.volume.filter(v => v).reduce((a, b) => a + b, 0) / quotes.volume.filter(v => v).length : 0;
                 let marketCap = meta.marketCap;
                 
-                // Fetch detailed quote data from Yahoo Finance for P/E, EPS, etc.
-                let quoteData = null;
+                // Fetch financial metrics from multiple sources
+                let peRatio = null, epsValue = null, dividendYield = null, forwardPE = null, pegRatio = null, priceToBook = null;
+                
+                // Primary: Finnhub basic financials (most reliable, no CORS issues)
                 try {
-                    const quoteUrl = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=summaryDetail,defaultKeyStatistics,financialData,price`;
-                    const quoteResponse = await fetchWithProxy(quoteUrl, 5000);
-                    if (quoteResponse && quoteResponse.quoteSummary && quoteResponse.quoteSummary.result) {
-                        quoteData = quoteResponse.quoteSummary.result[0];
+                    const finnhubMetricsUrl = `https://finnhub.io/api/v1/stock/metric?symbol=${symbol}&metric=all&token=demo`;
+                    const metricsResp = await fetchWithTimeout(finnhubMetricsUrl, 5000);
+                    if (metricsResp.ok) {
+                        const metricsData = await metricsResp.json();
+                        if (metricsData && metricsData.metric) {
+                            const m = metricsData.metric;
+                            peRatio = m.peBasicExclExtraTTM || m.peTTM;
+                            epsValue = m.epsBasicExclExtraItemsTTM || m.epsTTM;
+                            dividendYield = m.dividendYieldIndicatedAnnual ? m.dividendYieldIndicatedAnnual / 100 : null;
+                            forwardPE = m.peExclExtraAnnual;
+                            pegRatio = m.pegAnnual;
+                            priceToBook = m.pbQuarterly || m.pbAnnual;
+                            if (!marketCap && m.marketCapitalization) {
+                                marketCap = m.marketCapitalization * 1000000; // Convert from millions
+                            }
+                        }
                     }
                 } catch (e) {
-                    console.log('Could not fetch quote summary, trying alternative...');
-                    // Try alternative Yahoo endpoint
+                    console.log('Finnhub metrics failed, trying Yahoo...');
+                }
+                
+                // Fallback: Yahoo Finance v7 quote endpoint
+                if (!peRatio && !epsValue) {
                     try {
-                        const altUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-                        const altResponse = await fetchWithProxy(altUrl, 5000);
-                        if (altResponse && altResponse.quoteResponse && altResponse.quoteResponse.result) {
-                            const q = altResponse.quoteResponse.result[0];
-                            quoteData = {
-                                summaryDetail: {
-                                    trailingPE: { raw: q.trailingPE },
-                                    forwardPE: { raw: q.forwardPE },
-                                    dividendYield: { raw: q.dividendYield },
-                                    marketCap: { raw: q.marketCap },
-                                    fiftyTwoWeekHigh: { raw: q.fiftyTwoWeekHigh },
-                                    fiftyTwoWeekLow: { raw: q.fiftyTwoWeekLow }
-                                },
-                                defaultKeyStatistics: {
-                                    trailingEps: { raw: q.epsTrailingTwelveMonths },
-                                    forwardEps: { raw: q.epsForward },
-                                    pegRatio: { raw: q.pegRatio },
-                                    priceToBook: { raw: q.priceToBook }
-                                },
-                                price: {
-                                    shortName: q.shortName,
-                                    marketCap: { raw: q.marketCap }
-                                }
-                            };
+                        const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+                        const yahooResp = await fetchWithProxy(yahooUrl, 5000);
+                        if (yahooResp && yahooResp.quoteResponse && yahooResp.quoteResponse.result && yahooResp.quoteResponse.result[0]) {
+                            const q = yahooResp.quoteResponse.result[0];
+                            peRatio = peRatio || q.trailingPE;
+                            forwardPE = forwardPE || q.forwardPE;
+                            epsValue = epsValue || q.epsTrailingTwelveMonths;
+                            dividendYield = dividendYield || q.trailingAnnualDividendYield;
+                            pegRatio = pegRatio || q.pegRatio;
+                            priceToBook = priceToBook || q.priceToBook;
+                            if (!marketCap && q.marketCap) {
+                                marketCap = q.marketCap;
+                            }
                         }
-                    } catch (e2) {
-                        console.log('Alternative quote fetch also failed');
+                    } catch (e) {
+                        console.log('Yahoo quote also failed');
                     }
                 }
                 
-                // Extract financial metrics from quote data
-                let peRatio = null, epsValue = null, dividendYield = null, forwardPE = null, pegRatio = null, priceToBook = null;
-                
-                if (quoteData) {
-                    if (quoteData.summaryDetail) {
-                        peRatio = quoteData.summaryDetail.trailingPE?.raw;
-                        forwardPE = quoteData.summaryDetail.forwardPE?.raw;
-                        dividendYield = quoteData.summaryDetail.dividendYield?.raw;
-                        if (!marketCap && quoteData.summaryDetail.marketCap) {
-                            marketCap = quoteData.summaryDetail.marketCap.raw;
+                // Second fallback: Alpha Vantage overview (free tier)
+                if (!peRatio && !epsValue) {
+                    try {
+                        const avUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=demo`;
+                        const avResp = await fetchWithProxy(avUrl, 5000);
+                        if (avResp && avResp.PERatio) {
+                            peRatio = parseFloat(avResp.PERatio) || null;
+                            epsValue = parseFloat(avResp.EPS) || null;
+                            dividendYield = parseFloat(avResp.DividendYield) || null;
+                            forwardPE = parseFloat(avResp.ForwardPE) || null;
+                            pegRatio = parseFloat(avResp.PEGRatio) || null;
+                            priceToBook = parseFloat(avResp.PriceToBookRatio) || null;
                         }
-                    }
-                    if (quoteData.defaultKeyStatistics) {
-                        epsValue = quoteData.defaultKeyStatistics.trailingEps?.raw;
-                        pegRatio = quoteData.defaultKeyStatistics.pegRatio?.raw;
-                        priceToBook = quoteData.defaultKeyStatistics.priceToBook?.raw;
+                    } catch (e) {
+                        console.log('Alpha Vantage also failed');
                     }
                 }
                 
@@ -3804,12 +3809,16 @@
                 const displayEPS = epsValue || (financialMetrics?.metric?.epsBasicExclExtraItemsTTM);
                 const displayDividend = dividendYield || (financialMetrics?.metric?.dividendYieldIndicatedAnnual);
                 
-                document.getElementById('result-pe').textContent = displayPE ? displayPE.toFixed(2) : '--';
-                document.getElementById('result-eps').textContent = displayEPS ? `$${displayEPS.toFixed(2)}` : '--';
-                document.getElementById('result-dividend').textContent = displayDividend ? `${(displayDividend * 100).toFixed(2)}%` : '--';
+                // Display P/E, EPS, Dividend - use fetched values
+                document.getElementById('result-pe').textContent = peRatio ? peRatio.toFixed(2) : '--';
+                document.getElementById('result-eps').textContent = epsValue ? `$${epsValue.toFixed(2)}` : '--';
+                document.getElementById('result-dividend').textContent = dividendYield ? `${(dividendYield * 100).toFixed(2)}%` : '--';
+                
+                // Log what we got for debugging
+                console.log('Valuation data:', { peRatio, epsValue, dividendYield, forwardPE, pegRatio, priceToBook, marketCap });
                 
                 // Update Valuation Metrics section
-                const valuationMetrics = { pe: displayPE, forwardPE, pegRatio, priceToBook, marketCap, eps: displayEPS, dividend: displayDividend };
+                const valuationMetrics = { pe: peRatio, forwardPE, pegRatio, priceToBook, marketCap, eps: epsValue, dividend: dividendYield };
                 updateValuationMetrics(valuationMetrics, price);
                 
                 // Update company profile
