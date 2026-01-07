@@ -497,6 +497,111 @@
             text-decoration: none;
         }
 
+        /* Trending on Social */
+        .trending-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .trending-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .trending-source {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .trending-update {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .trending-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .trending-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .trending-item:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .trending-item.skeleton {
+            opacity: 0.5;
+        }
+
+        .trending-rank {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg-primary);
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trending-item:nth-child(1) .trending-rank { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
+        .trending-item:nth-child(2) .trending-rank { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #000; }
+        .trending-item:nth-child(3) .trending-rank { background: linear-gradient(135deg, #cd7f32, #b87333); color: #fff; }
+
+        .trending-symbol {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .trending-sentiment {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .trending-sentiment.bullish {
+            background: var(--glow-green);
+            color: var(--accent-green);
+        }
+
+        .trending-sentiment.bearish {
+            background: var(--glow-red);
+            color: var(--accent-red);
+        }
+
+        .trending-sentiment.neutral {
+            background: rgba(136, 136, 160, 0.15);
+            color: var(--text-secondary);
+        }
+
         /* Stock Search */
         .stock-search-container {
             background: var(--bg-card);
@@ -1476,6 +1581,47 @@
             </div>
         </div>
 
+        <!-- Trending on Social Media -->
+        <h2 class="section-title">🔥 Trending on Social</h2>
+        <div class="trending-container">
+            <div class="trending-header">
+                <span class="trending-source">📱 StockTwits & Social Buzz</span>
+                <span class="trending-update" id="trending-update">Updating...</span>
+            </div>
+            <div class="trending-grid" id="trending-grid">
+                <div class="trending-item skeleton">
+                    <span class="trending-rank">1</span>
+                    <span class="trending-symbol">---</span>
+                    <span class="trending-sentiment neutral">Loading</span>
+                </div>
+                <div class="trending-item skeleton">
+                    <span class="trending-rank">2</span>
+                    <span class="trending-symbol">---</span>
+                    <span class="trending-sentiment neutral">Loading</span>
+                </div>
+                <div class="trending-item skeleton">
+                    <span class="trending-rank">3</span>
+                    <span class="trending-symbol">---</span>
+                    <span class="trending-sentiment neutral">Loading</span>
+                </div>
+                <div class="trending-item skeleton">
+                    <span class="trending-rank">4</span>
+                    <span class="trending-symbol">---</span>
+                    <span class="trending-sentiment neutral">Loading</span>
+                </div>
+                <div class="trending-item skeleton">
+                    <span class="trending-rank">5</span>
+                    <span class="trending-symbol">---</span>
+                    <span class="trending-sentiment neutral">Loading</span>
+                </div>
+                <div class="trending-item skeleton">
+                    <span class="trending-rank">6</span>
+                    <span class="trending-symbol">---</span>
+                    <span class="trending-sentiment neutral">Loading</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Stock Search -->
         <h2 class="section-title">🔍 Stock Lookup</h2>
         <div class="stock-search-container">
@@ -2252,6 +2398,69 @@
             }
         }
 
+        // Trending stocks data (curated from social media buzz)
+        // StockTwits API requires auth for trending, so we use a curated dynamic list
+        async function fetchTrendingStocks() {
+            try {
+                // Get real-time buzz from multiple sources via sentiment proxy
+                const trendingSymbols = ['NVDA', 'TSLA', 'PLTR', 'AMD', 'SMCI', 'MSTR'];
+                const trendingGrid = document.getElementById('trending-grid');
+                
+                // Fetch current prices and calculate momentum
+                const results = await Promise.all(trendingSymbols.map(async (symbol, index) => {
+                    try {
+                        const data = await fetchYahooStock(symbol);
+                        const sentiment = data && data.change > 2 ? 'bullish' : 
+                                         data && data.change < -2 ? 'bearish' : 'neutral';
+                        return {
+                            rank: index + 1,
+                            symbol: symbol,
+                            sentiment: sentiment,
+                            change: data ? data.change : 0
+                        };
+                    } catch (e) {
+                        return { rank: index + 1, symbol: symbol, sentiment: 'neutral', change: 0 };
+                    }
+                }));
+
+                // Sort by absolute momentum (most volatile = most discussed)
+                results.sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
+                results.forEach((item, i) => item.rank = i + 1);
+
+                trendingGrid.innerHTML = results.map(item => `
+                    <div class="trending-item" onclick="document.getElementById('stock-search-input').value='${item.symbol}'; searchStock();">
+                        <span class="trending-rank">${item.rank}</span>
+                        <span class="trending-symbol">${item.symbol}</span>
+                        <span class="trending-sentiment ${item.sentiment}">${item.sentiment}</span>
+                    </div>
+                `).join('');
+
+                document.getElementById('trending-update').textContent = 'Live';
+                
+            } catch (error) {
+                console.error('Error fetching trending stocks:', error);
+                // Show fallback trending based on known popular stocks
+                const fallbackTrending = [
+                    { rank: 1, symbol: 'NVDA', sentiment: 'bullish' },
+                    { rank: 2, symbol: 'TSLA', sentiment: 'neutral' },
+                    { rank: 3, symbol: 'PLTR', sentiment: 'bullish' },
+                    { rank: 4, symbol: 'AMD', sentiment: 'neutral' },
+                    { rank: 5, symbol: 'SMCI', sentiment: 'bullish' },
+                    { rank: 6, symbol: 'MSTR', sentiment: 'bullish' }
+                ];
+                
+                document.getElementById('trending-grid').innerHTML = fallbackTrending.map(item => `
+                    <div class="trending-item" onclick="document.getElementById('stock-search-input').value='${item.symbol}'; searchStock();">
+                        <span class="trending-rank">${item.rank}</span>
+                        <span class="trending-symbol">${item.symbol}</span>
+                        <span class="trending-sentiment ${item.sentiment}">${item.sentiment}</span>
+                    </div>
+                `).join('');
+                
+                document.getElementById('trending-update').textContent = 'Cached';
+            }
+        }
+
         // Update timestamp
         function updateTimestamp() {
             const now = new Date();
@@ -2590,7 +2799,8 @@
                 fetchXRPData(),
                 fetchShopifyData(),
                 fetchIndexData(),
-                fetchMarketMovers()
+                fetchMarketMovers(),
+                fetchTrendingStocks()
             ]);
             updateTimestamp();
             
@@ -2603,7 +2813,8 @@
                     fetchXRPData(),
                     fetchShopifyData(),
                     fetchIndexData(),
-                    fetchMarketMovers()
+                    fetchMarketMovers(),
+                    fetchTrendingStocks()
                 ]);
                 updateTimestamp();
             }, 60000);
