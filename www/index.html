@@ -760,6 +760,154 @@
             font-weight: 600;
         }
 
+        /* Confluence Indicator */
+        .confluence-indicator {
+            background: linear-gradient(135deg, var(--bg-secondary), rgba(100, 255, 218, 0.05));
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid transparent;
+        }
+
+        .confluence-indicator.bullish {
+            border-color: rgba(100, 255, 218, 0.3);
+            background: linear-gradient(135deg, var(--bg-secondary), rgba(100, 255, 218, 0.1));
+        }
+
+        .confluence-indicator.bearish {
+            border-color: rgba(255, 107, 107, 0.3);
+            background: linear-gradient(135deg, var(--bg-secondary), rgba(255, 107, 107, 0.1));
+        }
+
+        .confluence-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .confluence-icon {
+            font-size: 1.5rem;
+        }
+
+        .confluence-header h4 {
+            color: var(--accent-gold);
+            margin: 0;
+        }
+
+        .confluence-meters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .source-meter {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border-radius: 8px;
+        }
+
+        .source-name {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .source-signal {
+            font-weight: bold;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .source-signal.bullish {
+            background: rgba(100, 255, 218, 0.2);
+            color: var(--accent-green);
+        }
+
+        .source-signal.bearish {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .source-signal.neutral {
+            background: rgba(255, 213, 79, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .confluence-message {
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: var(--bg-primary);
+        }
+
+        .confluence-message.strong {
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Social Sentiment */
+        .social-sentiment {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-sentiment h4 {
+            margin-bottom: 1rem;
+            color: #1DA1F2;
+        }
+
+        .social-bar-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .social-bar {
+            display: flex;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-primary);
+        }
+
+        .social-segment {
+            transition: width 0.3s ease;
+        }
+
+        .social-segment.bullish { background: linear-gradient(90deg, #00c853, #69f0ae); }
+        .social-segment.bearish { background: linear-gradient(90deg, #ff8a65, #ff5252); }
+
+        .social-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .bullish-label { color: #69f0ae; }
+        .bearish-label { color: #ff6b6b; }
+
+        .social-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
         /* Analyst Ratings */
         .analyst-ratings {
             background: var(--bg-secondary);
@@ -1754,6 +1902,29 @@
                         <span class="value" id="result-pe">--</span>
                     </div>
                 </div>
+                <!-- Confluence Indicator -->
+                <div class="confluence-indicator" id="confluence-indicator" style="display: none;">
+                    <div class="confluence-header">
+                        <span class="confluence-icon" id="confluence-icon">🎯</span>
+                        <h4 id="confluence-title">Signal Confluence</h4>
+                    </div>
+                    <div class="confluence-meters">
+                        <div class="source-meter" id="meter-analysts">
+                            <span class="source-name">🏦 Analysts</span>
+                            <span class="source-signal neutral" id="signal-analysts">--</span>
+                        </div>
+                        <div class="source-meter" id="meter-social">
+                            <span class="source-name">📱 Social</span>
+                            <span class="source-signal neutral" id="signal-social">--</span>
+                        </div>
+                        <div class="source-meter" id="meter-technical">
+                            <span class="source-name">📈 Technical</span>
+                            <span class="source-signal neutral" id="signal-technical">--</span>
+                        </div>
+                    </div>
+                    <div class="confluence-message" id="confluence-message"></div>
+                </div>
+
                 <div class="analyst-ratings" id="analyst-ratings" style="display: none;">
                     <h4>🏦 Wall Street Analyst Ratings</h4>
                     <div class="analyst-bar-container">
@@ -1777,6 +1948,25 @@
                             <span class="legend-item"><span class="dot hold"></span>Hold</span>
                             <span class="legend-item"><span class="dot sell"></span>Sell</span>
                             <span class="legend-item"><span class="dot strong-sell"></span>Strong Sell</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Sentiment -->
+                <div class="social-sentiment" id="social-sentiment" style="display: none;">
+                    <h4>📱 Social Media Sentiment (StockTwits)</h4>
+                    <div class="social-bar-container">
+                        <div class="social-bar">
+                            <div class="social-segment bullish" id="social-bullish"></div>
+                            <div class="social-segment bearish" id="social-bearish"></div>
+                        </div>
+                        <div class="social-labels">
+                            <span class="bullish-label">🐂 <span id="social-bullish-pct">0%</span></span>
+                            <span class="bearish-label">🐻 <span id="social-bearish-pct">0%</span></span>
+                        </div>
+                        <div class="social-stats">
+                            <span id="social-posts">0 posts analyzed</span>
+                            <span id="social-watchers">0 watchers</span>
                         </div>
                     </div>
                 </div>
@@ -2851,8 +3041,33 @@
                     console.log('Could not fetch analyst data');
                 }
                 
-                // Determine signal based on multiple factors + analyst data
-                const signal = calculateSignal(price, change, position52, volume, avgVolume, analystData);
+                // Fetch StockTwits social sentiment
+                let socialSentiment = null;
+                try {
+                    const stocktwitsUrl = `https://api.stocktwits.com/api/2/streams/symbol/${symbol}.json`;
+                    const socialResponse = await fetchWithProxy(stocktwitsUrl, 5000);
+                    if (socialResponse && socialResponse.symbol) {
+                        const messages = socialResponse.messages || [];
+                        let bullish = 0, bearish = 0;
+                        messages.forEach(msg => {
+                            if (msg.entities && msg.entities.sentiment) {
+                                if (msg.entities.sentiment.basic === 'Bullish') bullish++;
+                                if (msg.entities.sentiment.basic === 'Bearish') bearish++;
+                            }
+                        });
+                        socialSentiment = {
+                            bullish,
+                            bearish,
+                            total: messages.length,
+                            watchlist: socialResponse.symbol.watchlist_count || 0
+                        };
+                    }
+                } catch (e) {
+                    console.log('Could not fetch social sentiment');
+                }
+                
+                // Determine signal based on multiple factors + analyst data + social sentiment
+                const signal = calculateSignal(price, change, position52, volume, avgVolume, analystData, socialSentiment);
                 
                 // Update UI
                 document.getElementById('result-symbol').textContent = symbol;
@@ -2898,6 +3113,65 @@
                     document.getElementById('analyst-ratings').style.display = 'none';
                 }
                 
+                // Update social sentiment display
+                if (signal.socialSentiment && signal.socialSentiment.total > 0) {
+                    document.getElementById('social-sentiment').style.display = 'block';
+                    const ss = signal.socialSentiment;
+                    const bullishPct = (ss.bullish / ss.total) * 100;
+                    const bearishPct = (ss.bearish / ss.total) * 100;
+                    const neutralPct = 100 - bullishPct - bearishPct;
+                    
+                    document.getElementById('social-bullish').style.width = `${bullishPct + neutralPct/2}%`;
+                    document.getElementById('social-bearish').style.width = `${bearishPct + neutralPct/2}%`;
+                    document.getElementById('social-bullish-pct').textContent = `${bullishPct.toFixed(0)}%`;
+                    document.getElementById('social-bearish-pct').textContent = `${bearishPct.toFixed(0)}%`;
+                    document.getElementById('social-posts').textContent = `${ss.total} posts analyzed`;
+                    document.getElementById('social-watchers').textContent = ss.watchlist ? `${(ss.watchlist/1000).toFixed(0)}K watchers` : '';
+                } else {
+                    document.getElementById('social-sentiment').style.display = 'none';
+                }
+                
+                // Update confluence indicator
+                const conf = signal.confluence;
+                const confEl = document.getElementById('confluence-indicator');
+                confEl.style.display = 'block';
+                confEl.className = `confluence-indicator ${conf.type}`;
+                
+                // Determine individual signals for display
+                const getSignalClass = (signal) => signal === 'bullish' ? 'bullish' : signal === 'bearish' ? 'bearish' : 'neutral';
+                const getSignalText = (signal) => signal === 'bullish' ? '▲ BULLISH' : signal === 'bearish' ? '▼ BEARISH' : '● NEUTRAL';
+                
+                // We need to recalculate individual signals - get from reasons
+                let analystSig = 'neutral', socialSig = 'neutral', techSig = 'neutral';
+                signal.reasons.forEach(r => {
+                    if (r.text.includes('🏦') && r.type === 'bullish') analystSig = 'bullish';
+                    if (r.text.includes('🏦') && r.type === 'bearish') analystSig = 'bearish';
+                    if (r.text.includes('📱') && r.type === 'bullish') socialSig = 'bullish';
+                    if (r.text.includes('📱') && r.type === 'bearish') socialSig = 'bearish';
+                    if ((r.text.includes('📈') || r.text.includes('🚀') || r.text.includes('💰')) && r.type === 'bullish') techSig = 'bullish';
+                    if ((r.text.includes('📉') || r.text.includes('⚠️')) && r.type === 'bearish') techSig = 'bearish';
+                });
+                
+                document.getElementById('signal-analysts').textContent = getSignalText(analystSig);
+                document.getElementById('signal-analysts').className = `source-signal ${getSignalClass(analystSig)}`;
+                document.getElementById('signal-social').textContent = getSignalText(socialSig);
+                document.getElementById('signal-social').className = `source-signal ${getSignalClass(socialSig)}`;
+                document.getElementById('signal-technical').textContent = getSignalText(techSig);
+                document.getElementById('signal-technical').className = `source-signal ${getSignalClass(techSig)}`;
+                
+                // Update confluence message
+                const confMsg = document.getElementById('confluence-message');
+                if (conf.level >= 3) {
+                    confMsg.innerHTML = `<strong>🔥 PERFECT CONFLUENCE!</strong> All 3 sources agree: ${conf.type.toUpperCase()}`;
+                    confMsg.className = 'confluence-message strong';
+                } else if (conf.level >= 2) {
+                    confMsg.innerHTML = `✅ ${conf.level}/3 sources agree: ${conf.sources.join(' + ')} are ${conf.type}`;
+                    confMsg.className = 'confluence-message';
+                } else {
+                    confMsg.innerHTML = `⚖️ Mixed signals - no clear consensus`;
+                    confMsg.className = 'confluence-message';
+                }
+                
                 // Update position bar
                 document.getElementById('result-position-marker').style.left = `${position52}%`;
                 document.getElementById('result-position-text').textContent = `${position52.toFixed(0)}%`;
@@ -2926,9 +3200,14 @@
             }
         }
 
-        function calculateSignal(price, change, position52, volume, avgVolume, analystData) {
+        function calculateSignal(price, change, position52, volume, avgVolume, analystData, socialSentiment) {
             let score = 0;
             const reasons = [];
+            
+            // Track individual source signals for confluence
+            let analystSignal = 'neutral'; // bullish, bearish, neutral
+            let socialSignal = 'neutral';
+            let technicalSignal = 'neutral';
             
             // 🏦 ANALYST RECOMMENDATIONS (highest weight)
             if (analystData) {
@@ -2943,12 +3222,15 @@
                     
                     if (buyPercent >= 70) {
                         score += 2;
+                        analystSignal = 'bullish';
                         reasons.push({ type: 'bullish', text: `🏦 ${buyCount}/${totalAnalysts} analysts rate BUY (${buyPercent.toFixed(0)}%)` });
                     } else if (buyPercent >= 50) {
                         score += 1;
+                        analystSignal = 'bullish';
                         reasons.push({ type: 'bullish', text: `🏦 ${buyCount}/${totalAnalysts} analysts rate BUY (${buyPercent.toFixed(0)}%)` });
                     } else if (sellPercent >= 50) {
                         score -= 1.5;
+                        analystSignal = 'bearish';
                         reasons.push({ type: 'bearish', text: `🏦 ${sellCount}/${totalAnalysts} analysts rate SELL (${sellPercent.toFixed(0)}%)` });
                     } else {
                         reasons.push({ type: 'neutral', text: `🏦 Mixed analyst sentiment (${totalAnalysts} analysts)` });
@@ -2968,60 +3250,131 @@
                 reasons.push({ type: 'neutral', text: '📊 No analyst data available' });
             }
             
-            // 📈 Position in 52-week range
+            // 📱 SOCIAL SENTIMENT (StockTwits)
+            if (socialSentiment && socialSentiment.total > 0) {
+                const bullishPercent = (socialSentiment.bullish / socialSentiment.total) * 100;
+                const bearishPercent = (socialSentiment.bearish / socialSentiment.total) * 100;
+                
+                if (bullishPercent > 60) {
+                    score += 1;
+                    socialSignal = 'bullish';
+                    reasons.push({ type: 'bullish', text: `📱 Social buzz: ${bullishPercent.toFixed(0)}% bullish (${socialSentiment.total} posts)` });
+                } else if (bearishPercent > 60) {
+                    score -= 1;
+                    socialSignal = 'bearish';
+                    reasons.push({ type: 'bearish', text: `📱 Social buzz: ${bearishPercent.toFixed(0)}% bearish (${socialSentiment.total} posts)` });
+                } else if (socialSentiment.total > 5) {
+                    reasons.push({ type: 'neutral', text: `📱 Social buzz: mixed sentiment (${socialSentiment.total} posts)` });
+                }
+                
+                // High watchlist count is bullish
+                if (socialSentiment.watchlist > 50000) {
+                    score += 0.25;
+                    reasons.push({ type: 'bullish', text: `👀 ${(socialSentiment.watchlist/1000).toFixed(0)}K watching on StockTwits` });
+                }
+            } else {
+                reasons.push({ type: 'neutral', text: '📱 No social data available' });
+            }
+            
+            // 📈 Position in 52-week range (Technical)
+            let techScore = 0;
             if (position52 < 20) {
-                score -= 0.5;
+                techScore -= 0.5;
                 reasons.push({ type: 'bearish', text: '📉 Near 52-week low' });
             } else if (position52 < 40) {
-                score += 0.5;
+                techScore += 0.5;
                 reasons.push({ type: 'bullish', text: '💰 Potential value zone' });
             } else if (position52 > 80) {
-                score += 0.25;
+                techScore += 0.25;
                 reasons.push({ type: 'neutral', text: '🔝 Near 52-week high' });
             } else if (position52 > 60) {
-                score += 0.5;
+                techScore += 0.5;
                 reasons.push({ type: 'bullish', text: '📈 Strong momentum' });
             }
             
-            // 📊 Daily change
+            // 📊 Daily change (Technical)
             if (change > 3) {
-                score += 0.5;
+                techScore += 0.5;
                 reasons.push({ type: 'bullish', text: '🚀 Strong daily gain' });
             } else if (change > 1) {
-                score += 0.25;
+                techScore += 0.25;
                 reasons.push({ type: 'bullish', text: '✅ Positive momentum' });
             } else if (change < -3) {
-                score -= 0.5;
+                techScore -= 0.5;
                 reasons.push({ type: 'bearish', text: '⚠️ Sharp decline today' });
             } else if (change < -1) {
-                score -= 0.25;
+                techScore -= 0.25;
                 reasons.push({ type: 'bearish', text: '📉 Negative momentum' });
             }
             
-            // 📊 Volume analysis
+            // 📊 Volume analysis (Technical)
             if (avgVolume > 0) {
                 const volumeRatio = volume / avgVolume;
                 if (volumeRatio > 1.5) {
-                    score += 0.25;
+                    techScore += 0.25;
                     reasons.push({ type: 'bullish', text: '📊 High volume activity' });
                 } else if (volumeRatio < 0.5) {
                     reasons.push({ type: 'neutral', text: '😴 Low volume today' });
                 }
             }
             
-            // Determine signal
+            // Determine technical signal
+            if (techScore >= 0.5) technicalSignal = 'bullish';
+            else if (techScore <= -0.5) technicalSignal = 'bearish';
+            
+            score += techScore;
+            
+            // 🎯 CONFLUENCE BONUS - when multiple sources agree
+            const signals = [analystSignal, socialSignal, technicalSignal];
+            const bullishCount = signals.filter(s => s === 'bullish').length;
+            const bearishCount = signals.filter(s => s === 'bearish').length;
+            
+            let confluence = {
+                level: 0,
+                type: 'neutral',
+                sources: []
+            };
+            
+            if (bullishCount >= 2) {
+                score += 0.5 * bullishCount;
+                confluence.level = bullishCount;
+                confluence.type = 'bullish';
+                if (analystSignal === 'bullish') confluence.sources.push('Analysts');
+                if (socialSignal === 'bullish') confluence.sources.push('Social');
+                if (technicalSignal === 'bullish') confluence.sources.push('Technicals');
+                reasons.unshift({ 
+                    type: 'bullish', 
+                    text: `🎯 CONFLUENCE: ${bullishCount}/3 sources BULLISH (${confluence.sources.join(' + ')})` 
+                });
+            } else if (bearishCount >= 2) {
+                score -= 0.5 * bearishCount;
+                confluence.level = bearishCount;
+                confluence.type = 'bearish';
+                if (analystSignal === 'bearish') confluence.sources.push('Analysts');
+                if (socialSignal === 'bearish') confluence.sources.push('Social');
+                if (technicalSignal === 'bearish') confluence.sources.push('Technicals');
+                reasons.unshift({ 
+                    type: 'bearish', 
+                    text: `🎯 CONFLUENCE: ${bearishCount}/3 sources BEARISH (${confluence.sources.join(' + ')})` 
+                });
+            }
+            
+            // Determine final signal
             let signal;
-            if (score >= 2.5) {
+            if (score >= 3) {
                 signal = { label: 'STRONG BUY', class: 'strong-buy' };
             } else if (score >= 1.5) {
                 signal = { label: 'BUY', class: 'buy' };
-            } else if (score <= -2) {
+            } else if (score <= -2.5) {
                 signal = { label: 'STRONG SELL', class: 'strong-sell' };
             } else if (score <= -1) {
                 signal = { label: 'SELL', class: 'sell' };
             } else {
                 signal = { label: 'HOLD', class: 'hold' };
             }
+            
+            signal.confluence = confluence;
+            signal.socialSentiment = socialSentiment;
             
             // Generate summary
             const summaries = {
