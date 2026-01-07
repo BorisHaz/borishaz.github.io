@@ -1137,6 +1137,66 @@
             margin-top: 0.5rem;
         }
 
+        .platform-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border-radius: 8px;
+        }
+
+        .platform-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+
+        .platform-icon {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .platform-name {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .platform-sentiment {
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .platform-sentiment.bullish {
+            background: rgba(100, 255, 218, 0.2);
+            color: var(--accent-green);
+        }
+
+        .platform-sentiment.bearish {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .platform-sentiment.neutral {
+            background: rgba(255, 213, 79, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .platform-count {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            min-width: 60px;
+            text-align: right;
+        }
+
         /* Analyst Ratings */
         .analyst-ratings {
             background: var(--bg-secondary);
@@ -2282,7 +2342,9 @@
 
                 <!-- Social Sentiment -->
                 <div class="social-sentiment" id="social-sentiment" style="display: none;">
-                    <h4>📱 Social Media Sentiment (StockTwits)</h4>
+                    <h4>📱 Social Media Sentiment</h4>
+                    
+                    <!-- Combined sentiment bar -->
                     <div class="social-bar-container">
                         <div class="social-bar">
                             <div class="social-segment bullish" id="social-bullish"></div>
@@ -2292,10 +2354,33 @@
                             <span class="bullish-label">🐂 <span id="social-bullish-pct">0%</span></span>
                             <span class="bearish-label">🐻 <span id="social-bearish-pct">0%</span></span>
                         </div>
-                        <div class="social-stats">
-                            <span id="social-posts">0 posts analyzed</span>
-                            <span id="social-watchers">0 watchers</span>
+                    </div>
+                    
+                    <!-- Individual platform breakdown -->
+                    <div class="platform-breakdown">
+                        <div class="platform-item" id="platform-stocktwits" style="display: none;">
+                            <span class="platform-icon">💬</span>
+                            <span class="platform-name">StockTwits</span>
+                            <span class="platform-sentiment" id="stocktwits-sentiment">--</span>
+                            <span class="platform-count" id="stocktwits-count">0 posts</span>
                         </div>
+                        <div class="platform-item" id="platform-reddit" style="display: none;">
+                            <span class="platform-icon">🤖</span>
+                            <span class="platform-name">Reddit/WSB</span>
+                            <span class="platform-sentiment" id="reddit-sentiment">--</span>
+                            <span class="platform-count" id="reddit-count">0 comments</span>
+                        </div>
+                        <div class="platform-item" id="platform-twitter" style="display: none;">
+                            <span class="platform-icon">𝕏</span>
+                            <span class="platform-name">X/Twitter</span>
+                            <span class="platform-sentiment" id="twitter-sentiment">--</span>
+                            <span class="platform-count" id="twitter-count">0 posts</span>
+                        </div>
+                    </div>
+                    
+                    <div class="social-stats">
+                        <span id="social-posts">0 posts analyzed</span>
+                        <span id="social-watchers">0 watchers</span>
                     </div>
                 </div>
                 <div class="results-analysis">
@@ -3369,13 +3454,19 @@
                     console.log('Could not fetch analyst data');
                 }
                 
-                // Fetch StockTwits social sentiment
-                let socialSentiment = null;
+                // Fetch social sentiment from multiple sources
+                let socialSentiment = {
+                    stocktwits: null,
+                    reddit: null,
+                    combined: { bullish: 0, bearish: 0, total: 0 }
+                };
+                
+                // 1. StockTwits sentiment
                 try {
                     const stocktwitsUrl = `https://api.stocktwits.com/api/2/streams/symbol/${symbol}.json`;
-                    const socialResponse = await fetchWithProxy(stocktwitsUrl, 5000);
-                    if (socialResponse && socialResponse.symbol) {
-                        const messages = socialResponse.messages || [];
+                    const stResponse = await fetchWithProxy(stocktwitsUrl, 5000);
+                    if (stResponse && stResponse.symbol) {
+                        const messages = stResponse.messages || [];
                         let bullish = 0, bearish = 0;
                         messages.forEach(msg => {
                             if (msg.entities && msg.entities.sentiment) {
@@ -3383,15 +3474,79 @@
                                 if (msg.entities.sentiment.basic === 'Bearish') bearish++;
                             }
                         });
-                        socialSentiment = {
+                        socialSentiment.stocktwits = {
                             bullish,
                             bearish,
                             total: messages.length,
-                            watchlist: socialResponse.symbol.watchlist_count || 0
+                            watchlist: stResponse.symbol.watchlist_count || 0
                         };
+                        socialSentiment.combined.bullish += bullish;
+                        socialSentiment.combined.bearish += bearish;
+                        socialSentiment.combined.total += messages.length;
                     }
                 } catch (e) {
-                    console.log('Could not fetch social sentiment');
+                    console.log('Could not fetch StockTwits sentiment');
+                }
+                
+                // 2. Reddit sentiment (via Tradestie API - includes WSB and other stock subreddits)
+                try {
+                    const redditUrl = `https://tradestie.com/api/v1/apps/reddit?date=${new Date().toISOString().split('T')[0]}`;
+                    const redditResponse = await fetchWithProxy(redditUrl, 5000);
+                    if (redditResponse && Array.isArray(redditResponse)) {
+                        const stockData = redditResponse.find(s => s.ticker && s.ticker.toUpperCase() === symbol);
+                        if (stockData) {
+                            const sentiment = stockData.sentiment_score || 0;
+                            const comments = stockData.no_of_comments || 0;
+                            socialSentiment.reddit = {
+                                sentiment: sentiment, // -1 to 1 scale
+                                comments: comments,
+                                mentions: stockData.mentions || 0,
+                                bullish: sentiment > 0 ? Math.round(comments * Math.abs(sentiment)) : 0,
+                                bearish: sentiment < 0 ? Math.round(comments * Math.abs(sentiment)) : 0
+                            };
+                            if (sentiment > 0) {
+                                socialSentiment.combined.bullish += socialSentiment.reddit.bullish;
+                            } else {
+                                socialSentiment.combined.bearish += socialSentiment.reddit.bearish;
+                            }
+                            socialSentiment.combined.total += comments;
+                        }
+                    }
+                } catch (e) {
+                    console.log('Could not fetch Reddit sentiment');
+                }
+                
+                // 3. Try to get Twitter/X mentions via RapidAPI (free tier)
+                try {
+                    // Using a social search aggregator that may include Twitter data
+                    const socialSearchUrl = `https://api.socialgrep.com/v1/search?query=$${symbol}&platform=twitter&limit=30`;
+                    const twitterResponse = await fetchWithProxy(socialSearchUrl, 3000);
+                    if (twitterResponse && twitterResponse.posts) {
+                        let bullish = 0, bearish = 0;
+                        const bullishWords = ['buy', 'long', 'moon', 'rocket', 'bull', 'calls', 'pump', 'green', 'up', 'gains'];
+                        const bearishWords = ['sell', 'short', 'crash', 'bear', 'puts', 'dump', 'red', 'down', 'loss'];
+                        
+                        twitterResponse.posts.forEach(post => {
+                            const text = (post.text || post.content || '').toLowerCase();
+                            const hasBullish = bullishWords.some(w => text.includes(w));
+                            const hasBearish = bearishWords.some(w => text.includes(w));
+                            if (hasBullish && !hasBearish) bullish++;
+                            if (hasBearish && !hasBullish) bearish++;
+                        });
+                        
+                        if (twitterResponse.posts.length > 0) {
+                            socialSentiment.twitter = {
+                                bullish,
+                                bearish,
+                                total: twitterResponse.posts.length
+                            };
+                            socialSentiment.combined.bullish += bullish;
+                            socialSentiment.combined.bearish += bearish;
+                            socialSentiment.combined.total += twitterResponse.posts.length;
+                        }
+                    }
+                } catch (e) {
+                    console.log('Could not fetch Twitter/X sentiment');
                 }
                 
                 // Fetch company profile from Finnhub
@@ -3584,20 +3739,58 @@
                     document.getElementById('analyst-ratings').style.display = 'none';
                 }
                 
-                // Update social sentiment display
-                if (signal.socialSentiment && signal.socialSentiment.total > 0) {
+                // Update social sentiment display (multi-source)
+                if (socialSentiment && socialSentiment.combined.total > 0) {
                     document.getElementById('social-sentiment').style.display = 'block';
-                    const ss = signal.socialSentiment;
-                    const bullishPct = (ss.bullish / ss.total) * 100;
-                    const bearishPct = (ss.bearish / ss.total) * 100;
+                    const combined = socialSentiment.combined;
+                    const bullishPct = combined.total > 0 ? (combined.bullish / combined.total) * 100 : 50;
+                    const bearishPct = combined.total > 0 ? (combined.bearish / combined.total) * 100 : 50;
                     const neutralPct = 100 - bullishPct - bearishPct;
                     
                     document.getElementById('social-bullish').style.width = `${bullishPct + neutralPct/2}%`;
                     document.getElementById('social-bearish').style.width = `${bearishPct + neutralPct/2}%`;
                     document.getElementById('social-bullish-pct').textContent = `${bullishPct.toFixed(0)}%`;
                     document.getElementById('social-bearish-pct').textContent = `${bearishPct.toFixed(0)}%`;
-                    document.getElementById('social-posts').textContent = `${ss.total} posts analyzed`;
-                    document.getElementById('social-watchers').textContent = ss.watchlist ? `${(ss.watchlist/1000).toFixed(0)}K watchers` : '';
+                    document.getElementById('social-posts').textContent = `${combined.total} posts analyzed`;
+                    
+                    // StockTwits breakdown
+                    if (socialSentiment.stocktwits) {
+                        const st = socialSentiment.stocktwits;
+                        document.getElementById('platform-stocktwits').style.display = 'flex';
+                        const stBullPct = st.total > 0 ? (st.bullish / st.total) * 100 : 50;
+                        const stSentEl = document.getElementById('stocktwits-sentiment');
+                        stSentEl.textContent = stBullPct > 55 ? '🐂 Bullish' : stBullPct < 45 ? '🐻 Bearish' : '↔️ Mixed';
+                        stSentEl.className = `platform-sentiment ${stBullPct > 55 ? 'bullish' : stBullPct < 45 ? 'bearish' : 'neutral'}`;
+                        document.getElementById('stocktwits-count').textContent = `${st.total} posts`;
+                        document.getElementById('social-watchers').textContent = st.watchlist ? `${(st.watchlist/1000).toFixed(0)}K watching` : '';
+                    } else {
+                        document.getElementById('platform-stocktwits').style.display = 'none';
+                    }
+                    
+                    // Reddit breakdown
+                    if (socialSentiment.reddit) {
+                        const rd = socialSentiment.reddit;
+                        document.getElementById('platform-reddit').style.display = 'flex';
+                        const rdSentEl = document.getElementById('reddit-sentiment');
+                        rdSentEl.textContent = rd.sentiment > 0.2 ? '🐂 Bullish' : rd.sentiment < -0.2 ? '🐻 Bearish' : '↔️ Mixed';
+                        rdSentEl.className = `platform-sentiment ${rd.sentiment > 0.2 ? 'bullish' : rd.sentiment < -0.2 ? 'bearish' : 'neutral'}`;
+                        document.getElementById('reddit-count').textContent = `${rd.comments} comments`;
+                    } else {
+                        document.getElementById('platform-reddit').style.display = 'none';
+                    }
+                    
+                    // Twitter/X breakdown
+                    if (socialSentiment.twitter) {
+                        const tw = socialSentiment.twitter;
+                        document.getElementById('platform-twitter').style.display = 'flex';
+                        const twBullPct = tw.total > 0 ? (tw.bullish / tw.total) * 100 : 50;
+                        const twSentEl = document.getElementById('twitter-sentiment');
+                        twSentEl.textContent = twBullPct > 55 ? '🐂 Bullish' : twBullPct < 45 ? '🐻 Bearish' : '↔️ Mixed';
+                        twSentEl.className = `platform-sentiment ${twBullPct > 55 ? 'bullish' : twBullPct < 45 ? 'bearish' : 'neutral'}`;
+                        document.getElementById('twitter-count').textContent = `${tw.total} posts`;
+                    } else {
+                        document.getElementById('platform-twitter').style.display = 'none';
+                    }
                 } else {
                     document.getElementById('social-sentiment').style.display = 'none';
                 }
@@ -3721,27 +3914,51 @@
                 reasons.push({ type: 'neutral', text: '📊 No analyst data available' });
             }
             
-            // 📱 SOCIAL SENTIMENT (StockTwits)
-            if (socialSentiment && socialSentiment.total > 0) {
-                const bullishPercent = (socialSentiment.bullish / socialSentiment.total) * 100;
-                const bearishPercent = (socialSentiment.bearish / socialSentiment.total) * 100;
+            // 📱 SOCIAL SENTIMENT (Multi-source: StockTwits + Reddit + X/Twitter)
+            if (socialSentiment && socialSentiment.combined && socialSentiment.combined.total > 0) {
+                const combined = socialSentiment.combined;
+                const bullishPercent = (combined.bullish / combined.total) * 100;
+                const bearishPercent = (combined.bearish / combined.total) * 100;
+                
+                // Count active platforms
+                let platforms = [];
+                if (socialSentiment.stocktwits) platforms.push('StockTwits');
+                if (socialSentiment.reddit) platforms.push('Reddit');
+                if (socialSentiment.twitter) platforms.push('X');
                 
                 if (bullishPercent > 60) {
                     score += 1;
                     socialSignal = 'bullish';
-                    reasons.push({ type: 'bullish', text: `📱 Social buzz: ${bullishPercent.toFixed(0)}% bullish (${socialSentiment.total} posts)` });
+                    reasons.push({ type: 'bullish', text: `📱 Social: ${bullishPercent.toFixed(0)}% bullish across ${platforms.join(', ')} (${combined.total} posts)` });
                 } else if (bearishPercent > 60) {
                     score -= 1;
                     socialSignal = 'bearish';
-                    reasons.push({ type: 'bearish', text: `📱 Social buzz: ${bearishPercent.toFixed(0)}% bearish (${socialSentiment.total} posts)` });
-                } else if (socialSentiment.total > 5) {
-                    reasons.push({ type: 'neutral', text: `📱 Social buzz: mixed sentiment (${socialSentiment.total} posts)` });
+                    reasons.push({ type: 'bearish', text: `📱 Social: ${bearishPercent.toFixed(0)}% bearish across ${platforms.join(', ')} (${combined.total} posts)` });
+                } else if (combined.total > 5) {
+                    reasons.push({ type: 'neutral', text: `📱 Social: mixed sentiment across ${platforms.join(', ')} (${combined.total} posts)` });
+                }
+                
+                // Platform-specific bonuses
+                if (socialSentiment.reddit && socialSentiment.reddit.sentiment > 0.3) {
+                    score += 0.25;
+                    reasons.push({ type: 'bullish', text: `🤖 Reddit/WSB sentiment strongly positive` });
+                } else if (socialSentiment.reddit && socialSentiment.reddit.sentiment < -0.3) {
+                    score -= 0.25;
+                    reasons.push({ type: 'bearish', text: `🤖 Reddit/WSB sentiment strongly negative` });
+                }
+                
+                if (socialSentiment.twitter && socialSentiment.twitter.total > 10) {
+                    const twBullPct = (socialSentiment.twitter.bullish / socialSentiment.twitter.total) * 100;
+                    if (twBullPct > 70) {
+                        score += 0.25;
+                        reasons.push({ type: 'bullish', text: `𝕏 X/Twitter buzz very bullish` });
+                    }
                 }
                 
                 // High watchlist count is bullish
-                if (socialSentiment.watchlist > 50000) {
+                if (socialSentiment.stocktwits && socialSentiment.stocktwits.watchlist > 50000) {
                     score += 0.25;
-                    reasons.push({ type: 'bullish', text: `👀 ${(socialSentiment.watchlist/1000).toFixed(0)}K watching on StockTwits` });
+                    reasons.push({ type: 'bullish', text: `👀 ${(socialSentiment.stocktwits.watchlist/1000).toFixed(0)}K watching on StockTwits` });
                 }
             } else {
                 reasons.push({ type: 'neutral', text: '📱 No social data available' });
