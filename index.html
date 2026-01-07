@@ -3115,10 +3115,11 @@
         // List of CORS proxies to try
         // Multiple CORS proxy options (try in order)
         const corsProxies = [
-            (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
             (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
             (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
             (url) => `https://thingproxy.freeboard.io/fetch/${url}`,
+            (url) => `https://cors-anywhere.herokuapp.com/${url}`,
+            (url) => `https://yacdn.org/proxy/${url}`,
         ];
 
         // Fetch stock data from Yahoo Finance via CORS proxy (with fallbacks)
@@ -3562,34 +3563,57 @@
                 // Fetch financial metrics from multiple sources
                 let peRatio = null, epsValue = null, dividendYield = null, forwardPE = null, pegRatio = null, priceToBook = null;
                 
-                // Primary: Finnhub basic financials (most reliable, no CORS issues)
+                // Primary: Financial Modeling Prep (FMP) - free API with CORS support
                 try {
-                    const finnhubMetricsUrl = `https://finnhub.io/api/v1/stock/metric?symbol=${symbol}&metric=all&token=demo`;
-                    const metricsResp = await fetchWithTimeout(finnhubMetricsUrl, 5000);
-                    if (metricsResp.ok) {
-                        const metricsData = await metricsResp.json();
-                        if (metricsData && metricsData.metric) {
-                            const m = metricsData.metric;
-                            peRatio = m.peBasicExclExtraTTM || m.peTTM;
-                            epsValue = m.epsBasicExclExtraItemsTTM || m.epsTTM;
-                            dividendYield = m.dividendYieldIndicatedAnnual ? m.dividendYieldIndicatedAnnual / 100 : null;
-                            forwardPE = m.peExclExtraAnnual;
-                            pegRatio = m.pegAnnual;
-                            priceToBook = m.pbQuarterly || m.pbAnnual;
-                            if (!marketCap && m.marketCapitalization) {
-                                marketCap = m.marketCapitalization * 1000000; // Convert from millions
+                    const fmpUrl = `https://financialmodelingprep.com/api/v3/quote/${symbol}?apikey=demo`;
+                    const fmpResp = await fetchWithTimeout(fmpUrl, 5000);
+                    if (fmpResp.ok) {
+                        const fmpData = await fmpResp.json();
+                        if (fmpData && fmpData[0]) {
+                            const q = fmpData[0];
+                            peRatio = q.pe;
+                            epsValue = q.eps;
+                            if (!marketCap && q.marketCap) {
+                                marketCap = q.marketCap;
                             }
+                            console.log('FMP data loaded:', q);
                         }
                     }
                 } catch (e) {
-                    console.log('Finnhub metrics failed, trying Yahoo...');
+                    console.log('FMP failed, trying Finnhub...');
                 }
                 
-                // Fallback: Yahoo Finance v7 quote endpoint
+                // Fallback 1: Finnhub basic financials
+                if (!peRatio && !epsValue) {
+                    try {
+                        const finnhubMetricsUrl = `https://finnhub.io/api/v1/stock/metric?symbol=${symbol}&metric=all&token=demo`;
+                        const metricsResp = await fetchWithTimeout(finnhubMetricsUrl, 5000);
+                        if (metricsResp.ok) {
+                            const metricsData = await metricsResp.json();
+                            if (metricsData && metricsData.metric) {
+                                const m = metricsData.metric;
+                                peRatio = peRatio || m.peBasicExclExtraTTM || m.peTTM;
+                                epsValue = epsValue || m.epsBasicExclExtraItemsTTM || m.epsTTM;
+                                dividendYield = dividendYield || (m.dividendYieldIndicatedAnnual ? m.dividendYieldIndicatedAnnual / 100 : null);
+                                forwardPE = forwardPE || m.peExclExtraAnnual;
+                                pegRatio = pegRatio || m.pegAnnual;
+                                priceToBook = priceToBook || m.pbQuarterly || m.pbAnnual;
+                                if (!marketCap && m.marketCapitalization) {
+                                    marketCap = m.marketCapitalization * 1000000;
+                                }
+                                console.log('Finnhub metrics loaded:', metricsData.metric);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Finnhub metrics failed');
+                    }
+                }
+                
+                // Fallback 2: Yahoo Finance via CORS proxy
                 if (!peRatio && !epsValue) {
                     try {
                         const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-                        const yahooResp = await fetchWithProxy(yahooUrl, 5000);
+                        const yahooResp = await fetchWithProxy(yahooUrl, 8000);
                         if (yahooResp && yahooResp.quoteResponse && yahooResp.quoteResponse.result && yahooResp.quoteResponse.result[0]) {
                             const q = yahooResp.quoteResponse.result[0];
                             peRatio = peRatio || q.trailingPE;
@@ -3601,28 +3625,19 @@
                             if (!marketCap && q.marketCap) {
                                 marketCap = q.marketCap;
                             }
+                            console.log('Yahoo quote loaded:', q);
                         }
                     } catch (e) {
                         console.log('Yahoo quote also failed');
                     }
                 }
                 
-                // Second fallback: Alpha Vantage overview (free tier)
-                if (!peRatio && !epsValue) {
-                    try {
-                        const avUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=demo`;
-                        const avResp = await fetchWithProxy(avUrl, 5000);
-                        if (avResp && avResp.PERatio) {
-                            peRatio = parseFloat(avResp.PERatio) || null;
-                            epsValue = parseFloat(avResp.EPS) || null;
-                            dividendYield = parseFloat(avResp.DividendYield) || null;
-                            forwardPE = parseFloat(avResp.ForwardPE) || null;
-                            pegRatio = parseFloat(avResp.PEGRatio) || null;
-                            priceToBook = parseFloat(avResp.PriceToBookRatio) || null;
-                        }
-                    } catch (e) {
-                        console.log('Alpha Vantage also failed');
-                    }
+                // Use price and calculate basic metrics if still missing
+                if (!epsValue && peRatio && price) {
+                    epsValue = price / peRatio; // Calculate EPS from P/E
+                }
+                if (!peRatio && epsValue && price && epsValue > 0) {
+                    peRatio = price / epsValue; // Calculate P/E from EPS
                 }
                 
                 // Calculate 52-week position (0-100%)
