@@ -1,4 +1,4 @@
-const CACHE_NAME = 'market-pulse-v3';
+const CACHE_NAME = 'market-pulse-v4';
 const urlsToCache = [
   '/',
   '/index.html',

@@ -760,6 +760,88 @@
             font-weight: 600;
         }
 
+        /* Analyst Ratings */
+        .analyst-ratings {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .analyst-ratings h4 {
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+        }
+
+        .analyst-bar-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .analyst-bar {
+            display: flex;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-primary);
+        }
+
+        .analyst-segment {
+            transition: width 0.3s ease;
+        }
+
+        .analyst-segment.strong-buy { background: #00c853; }
+        .analyst-segment.buy { background: #69f0ae; }
+        .analyst-segment.hold { background: #ffd54f; }
+        .analyst-segment.sell { background: #ff8a65; }
+        .analyst-segment.strong-sell { background: #ff5252; }
+
+        .analyst-labels {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .analyst-labels span {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .analyst-labels .strong-buy { color: #00c853; }
+        .analyst-labels .buy { color: #69f0ae; }
+        .analyst-labels .hold { color: #ffd54f; }
+        .analyst-labels .sell { color: #ff8a65; }
+        .analyst-labels .strong-sell { color: #ff5252; }
+
+        .analyst-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .legend-item .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-item .dot.strong-buy { background: #00c853; }
+        .legend-item .dot.buy { background: #69f0ae; }
+        .legend-item .dot.hold { background: #ffd54f; }
+        .legend-item .dot.sell { background: #ff8a65; }
+        .legend-item .dot.strong-sell { background: #ff5252; }
+
         .results-analysis {
             background: var(--bg-secondary);
             padding: 1.5rem;
@@ -1670,6 +1752,32 @@
                     <div class="metric">
                         <span class="label">P/E Ratio</span>
                         <span class="value" id="result-pe">--</span>
+                    </div>
+                </div>
+                <div class="analyst-ratings" id="analyst-ratings" style="display: none;">
+                    <h4>🏦 Wall Street Analyst Ratings</h4>
+                    <div class="analyst-bar-container">
+                        <div class="analyst-bar">
+                            <div class="analyst-segment strong-buy" id="analyst-strong-buy"></div>
+                            <div class="analyst-segment buy" id="analyst-buy"></div>
+                            <div class="analyst-segment hold" id="analyst-hold"></div>
+                            <div class="analyst-segment sell" id="analyst-sell"></div>
+                            <div class="analyst-segment strong-sell" id="analyst-strong-sell"></div>
+                        </div>
+                        <div class="analyst-labels">
+                            <span class="strong-buy" id="analyst-sb-label">0</span>
+                            <span class="buy" id="analyst-b-label">0</span>
+                            <span class="hold" id="analyst-h-label">0</span>
+                            <span class="sell" id="analyst-s-label">0</span>
+                            <span class="strong-sell" id="analyst-ss-label">0</span>
+                        </div>
+                        <div class="analyst-legend">
+                            <span class="legend-item"><span class="dot strong-buy"></span>Strong Buy</span>
+                            <span class="legend-item"><span class="dot buy"></span>Buy</span>
+                            <span class="legend-item"><span class="dot hold"></span>Hold</span>
+                            <span class="legend-item"><span class="dot sell"></span>Sell</span>
+                            <span class="legend-item"><span class="dot strong-sell"></span>Strong Sell</span>
+                        </div>
                     </div>
                 </div>
                 <div class="results-analysis">
@@ -2728,8 +2836,23 @@
                 const range52 = high52 - low52;
                 const position52 = range52 > 0 ? ((price - low52) / range52) * 100 : 50;
                 
-                // Determine signal based on multiple factors
-                const signal = calculateSignal(price, change, position52, volume, avgVolume);
+                // Fetch analyst recommendations from Finnhub
+                let analystData = null;
+                try {
+                    const analystUrl = `https://finnhub.io/api/v1/stock/recommendation?symbol=${symbol}&token=demo`;
+                    const analystResponse = await fetchWithTimeout(analystUrl, 3000);
+                    if (analystResponse.ok) {
+                        const analystJson = await analystResponse.json();
+                        if (analystJson && analystJson.length > 0) {
+                            analystData = analystJson[0]; // Most recent
+                        }
+                    }
+                } catch (e) {
+                    console.log('Could not fetch analyst data');
+                }
+                
+                // Determine signal based on multiple factors + analyst data
+                const signal = calculateSignal(price, change, position52, volume, avgVolume, analystData);
                 
                 // Update UI
                 document.getElementById('result-symbol').textContent = symbol;
@@ -2746,6 +2869,34 @@
                 document.getElementById('result-volume').textContent = formatVolume(volume);
                 document.getElementById('result-avgvol').textContent = formatVolume(avgVolume);
                 document.getElementById('result-pe').textContent = '--';
+                
+                // Update analyst ratings display
+                if (analystData) {
+                    const total = (analystData.strongBuy || 0) + (analystData.buy || 0) + 
+                                 (analystData.hold || 0) + (analystData.sell || 0) + (analystData.strongSell || 0);
+                    
+                    if (total > 0) {
+                        document.getElementById('analyst-ratings').style.display = 'block';
+                        
+                        // Update bar segments
+                        document.getElementById('analyst-strong-buy').style.width = `${(analystData.strongBuy / total) * 100}%`;
+                        document.getElementById('analyst-buy').style.width = `${(analystData.buy / total) * 100}%`;
+                        document.getElementById('analyst-hold').style.width = `${(analystData.hold / total) * 100}%`;
+                        document.getElementById('analyst-sell').style.width = `${(analystData.sell / total) * 100}%`;
+                        document.getElementById('analyst-strong-sell').style.width = `${(analystData.strongSell / total) * 100}%`;
+                        
+                        // Update labels
+                        document.getElementById('analyst-sb-label').textContent = analystData.strongBuy || 0;
+                        document.getElementById('analyst-b-label').textContent = analystData.buy || 0;
+                        document.getElementById('analyst-h-label').textContent = analystData.hold || 0;
+                        document.getElementById('analyst-s-label').textContent = analystData.sell || 0;
+                        document.getElementById('analyst-ss-label').textContent = analystData.strongSell || 0;
+                    } else {
+                        document.getElementById('analyst-ratings').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('analyst-ratings').style.display = 'none';
+                }
                 
                 // Update position bar
                 document.getElementById('result-position-marker').style.left = `${position52}%`;
@@ -2775,47 +2926,83 @@
             }
         }
 
-        function calculateSignal(price, change, position52, volume, avgVolume) {
+        function calculateSignal(price, change, position52, volume, avgVolume, analystData) {
             let score = 0;
             const reasons = [];
             
-            // Position in 52-week range
-            if (position52 < 20) {
-                score -= 1;
-                reasons.push({ type: 'bearish', text: '📉 Near 52-week low' });
-            } else if (position52 < 40) {
-                score += 1;
-                reasons.push({ type: 'bullish', text: '💰 Potential value zone' });
-            } else if (position52 > 80) {
-                score += 0.5;
-                reasons.push({ type: 'neutral', text: '🔝 Near 52-week high' });
-            } else if (position52 > 60) {
-                score += 1;
-                reasons.push({ type: 'bullish', text: '📈 Strong momentum' });
+            // 🏦 ANALYST RECOMMENDATIONS (highest weight)
+            if (analystData) {
+                const totalAnalysts = (analystData.strongBuy || 0) + (analystData.buy || 0) + 
+                                     (analystData.hold || 0) + (analystData.sell || 0) + (analystData.strongSell || 0);
+                const buyCount = (analystData.strongBuy || 0) + (analystData.buy || 0);
+                const sellCount = (analystData.sell || 0) + (analystData.strongSell || 0);
+                
+                if (totalAnalysts > 0) {
+                    const buyPercent = (buyCount / totalAnalysts) * 100;
+                    const sellPercent = (sellCount / totalAnalysts) * 100;
+                    
+                    if (buyPercent >= 70) {
+                        score += 2;
+                        reasons.push({ type: 'bullish', text: `🏦 ${buyCount}/${totalAnalysts} analysts rate BUY (${buyPercent.toFixed(0)}%)` });
+                    } else if (buyPercent >= 50) {
+                        score += 1;
+                        reasons.push({ type: 'bullish', text: `🏦 ${buyCount}/${totalAnalysts} analysts rate BUY (${buyPercent.toFixed(0)}%)` });
+                    } else if (sellPercent >= 50) {
+                        score -= 1.5;
+                        reasons.push({ type: 'bearish', text: `🏦 ${sellCount}/${totalAnalysts} analysts rate SELL (${sellPercent.toFixed(0)}%)` });
+                    } else {
+                        reasons.push({ type: 'neutral', text: `🏦 Mixed analyst sentiment (${totalAnalysts} analysts)` });
+                    }
+                    
+                    // Strong buy/sell signals from analysts
+                    if (analystData.strongBuy > analystData.buy) {
+                        score += 0.5;
+                        reasons.push({ type: 'bullish', text: `⭐ ${analystData.strongBuy} STRONG BUY ratings` });
+                    }
+                    if (analystData.strongSell > 0) {
+                        score -= 0.5;
+                        reasons.push({ type: 'bearish', text: `⚠️ ${analystData.strongSell} STRONG SELL ratings` });
+                    }
+                }
             } else {
-                reasons.push({ type: 'neutral', text: '↔️ Mid-range position' });
+                reasons.push({ type: 'neutral', text: '📊 No analyst data available' });
             }
             
-            // Daily change
+            // 📈 Position in 52-week range
+            if (position52 < 20) {
+                score -= 0.5;
+                reasons.push({ type: 'bearish', text: '📉 Near 52-week low' });
+            } else if (position52 < 40) {
+                score += 0.5;
+                reasons.push({ type: 'bullish', text: '💰 Potential value zone' });
+            } else if (position52 > 80) {
+                score += 0.25;
+                reasons.push({ type: 'neutral', text: '🔝 Near 52-week high' });
+            } else if (position52 > 60) {
+                score += 0.5;
+                reasons.push({ type: 'bullish', text: '📈 Strong momentum' });
+            }
+            
+            // 📊 Daily change
             if (change > 3) {
-                score += 1;
+                score += 0.5;
                 reasons.push({ type: 'bullish', text: '🚀 Strong daily gain' });
             } else if (change > 1) {
-                score += 0.5;
+                score += 0.25;
                 reasons.push({ type: 'bullish', text: '✅ Positive momentum' });
             } else if (change < -3) {
-                score -= 1;
+                score -= 0.5;
                 reasons.push({ type: 'bearish', text: '⚠️ Sharp decline today' });
             } else if (change < -1) {
-                score -= 0.5;
+                score -= 0.25;
                 reasons.push({ type: 'bearish', text: '📉 Negative momentum' });
             }
             
-            // Volume analysis
+            // 📊 Volume analysis
             if (avgVolume > 0) {
                 const volumeRatio = volume / avgVolume;
                 if (volumeRatio > 1.5) {
-                    score += 0.5;
+                    score += 0.25;
                     reasons.push({ type: 'bullish', text: '📊 High volume activity' });
                 } else if (volumeRatio < 0.5) {
                     reasons.push({ type: 'neutral', text: '😴 Low volume today' });
@@ -2824,9 +3011,9 @@
             
             // Determine signal
             let signal;
-            if (score >= 2) {
+            if (score >= 2.5) {
                 signal = { label: 'STRONG BUY', class: 'strong-buy' };
-            } else if (score >= 1) {
+            } else if (score >= 1.5) {
                 signal = { label: 'BUY', class: 'buy' };
             } else if (score <= -2) {
                 signal = { label: 'STRONG SELL', class: 'strong-sell' };
